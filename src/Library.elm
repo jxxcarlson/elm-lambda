@@ -24,6 +24,10 @@ one s z =
     Lambda s (Lambda z (App (Var s) (Var z)))
 
 
+isZero =
+    Lambda "n" (App (App (Var "n") (Lambda "x" false)) true)
+
+
 two s z =
     Lambda s (Lambda z (App (Var s) (App (Var s) (Var z))))
 

@@ -62,11 +62,24 @@ suite =
                 \_ ->
                     beta (App (Library.zero "s" "z") (Library.one "s'" "z'"))
                         |> Expect.equal (Lambda "z" (Var "z"))
+            , test
+                "isZero zero"
+              <|
+                \_ ->
+                    beta (App Library.isZero (Library.zero "u" "v"))
+                        |> Expect.equal Library.true
+            , test
+                "isZero one"
+              <|
+                \_ ->
+                    beta (App Library.isZero (Library.one "u" "v"))
+                        |> Expect.equal Library.false
             ]
         ]
 
 
 
+-- beta (App isZero (zero "u" "v")
 {-
 
    > App id id

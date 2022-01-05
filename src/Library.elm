@@ -21,27 +21,27 @@ zero s z =
 
 
 one s z =
-    Lambda s (Lambda z (App (Var s) (Var z)))
+    Lambda s (Lambda z (Apply (Var s) (Var z)))
 
 
 isZero =
-    Lambda "n" (App (App (Var "n") (Lambda "x" false)) true)
+    Lambda "n" (Apply (Apply (Var "n") (Lambda "x" false)) true)
 
 
 two s z =
-    Lambda s (Lambda z (App (Var s) (App (Var s) (Var z))))
+    Lambda s (Lambda z (Apply (Var s) (Apply (Var s) (Var z))))
 
 
 a =
-    App (Var "s") (Var "z")
+    Apply (Var "s") (Var "z")
 
 
 ex1 =
-    App (App true (Var "e")) (Var "f")
+    Apply (Apply true (Var "e")) (Var "f")
 
 
 ex2 =
-    App (App false (Var "e")) (Var "f")
+    Apply (Apply false (Var "e")) (Var "f")
 
 
 id =

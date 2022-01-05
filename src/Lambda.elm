@@ -18,7 +18,7 @@ import Set exposing (Set)
 type Expr
     = Var String
     | Lambda String Expr
-    | App Expr Expr
+    | Apply Expr Expr
 
 
 type Value
@@ -41,7 +41,7 @@ eval expr env =
         Lambda name body ->
             Closure name body env
 
-        App operator operand ->
+        Apply operator operand ->
             call (eval operator env) (eval operand env)
 
 
@@ -68,7 +68,7 @@ freeVariables expr =
         Lambda name body ->
             Set.diff (freeVariables body) (Set.singleton name)
 
-        App e1 e2 ->
+        Apply e1 e2 ->
             Set.union (freeVariables e1) (freeVariables e2)
 
 
@@ -89,21 +89,21 @@ substitute expr1 x expr2 =
             else
                 expr2
 
-        App e1 e2 ->
-            App (substitute expr1 x e1) (substitute expr1 x e2)
+        Apply e1 e2 ->
+            Apply (substitute expr1 x e1) (substitute expr1 x e2)
 
 
 beta : Expr -> Expr
 beta expr =
     case expr of
-        App (Lambda x e1) e2 ->
+        Apply (Lambda x e1) e2 ->
             beta (substitute e2 x e1)
 
         Lambda x e ->
             Lambda x (beta e)
 
-        App e f ->
-            beta (App (beta e) f)
+        Apply e f ->
+            beta (Apply (beta e) f)
 
         _ ->
             expr

@@ -9,6 +9,8 @@ module Lambda exposing
     , substitute
     )
 
+-- https://lambdacalc.io/
+
 import Dict exposing (Dict)
 import Set exposing (Set)
 
@@ -96,6 +98,9 @@ beta expr =
     case expr of
         App (Lambda x e1) e2 ->
             beta (substitute e2 x e1)
+
+        Lambda x e ->
+            Lambda x (beta e)
 
         App e f ->
             beta (App (beta e) f)

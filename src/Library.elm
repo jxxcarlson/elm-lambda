@@ -16,6 +16,22 @@ false =
     Lambda "x" (Lambda "y" (Var "y"))
 
 
+zero s z =
+    Lambda s (Lambda z (Var z))
+
+
+one s z =
+    Lambda s (Lambda z (App (Var s) (Var z)))
+
+
+two s z =
+    Lambda s (Lambda z (App (Var s) (App (Var s) (Var z))))
+
+
+a =
+    App (Var "s") (Var "z")
+
+
 ex1 =
     App (App true (Var "e")) (Var "f")
 
@@ -26,6 +42,10 @@ ex2 =
 
 id =
     Lambda "x" (Var "x")
+
+
+id_ x =
+    Lambda x (Var x)
 
 
 k =

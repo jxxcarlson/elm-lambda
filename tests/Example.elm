@@ -3,14 +3,14 @@ module Example exposing (..)
 import Dict
 import Expect exposing (Expectation)
 import Lambda exposing (Env, Expr(..), Value(..), beta, eval)
+import Library exposing (id_)
 import Test exposing (..)
 
 
 suite : Test
 suite =
     describe "Lambda"
-        [ describe "Basics"
-            -- Nest as many descriptions as you like.
+        [ describe "eval"
             [ test "eval variable, empty environment" <|
                 \_ ->
                     eval (Var "x") Dict.empty
@@ -31,17 +31,37 @@ suite =
             ]
         , describe "beta"
             [ test
-                "true e f"
+                "true e f -> e"
               <|
                 \_ ->
                     beta (App (App (Lambda "x" (Lambda "y" (Var "x"))) (Var "e")) (Var "f"))
                         |> Expect.equal (Var "e")
             , test
-                "false e f"
+                "false e f -> f"
               <|
                 \_ ->
                     beta (App (App (Lambda "x" (Lambda "y" (Var "y"))) (Var "e")) (Var "f"))
                         |> Expect.equal (Var "f")
+            , test "id id -> id" <|
+                \_ -> beta (App (id_ "x") (id_ "y")) |> Expect.equal (id_ "y")
+            , test
+                "zero (Var 'u')"
+              <|
+                \_ ->
+                    beta (App (Library.zero "s" "z") (Var "u"))
+                        |> Expect.equal (Lambda "z" (Var "z"))
+            , test
+                "one zero"
+              <|
+                \_ ->
+                    beta (App (Library.one "s" "z") (Library.zero "s'" "z'"))
+                        |> Expect.equal (Lambda "z" (Lambda "z'" (Var "z'")))
+            , test
+                "zero one"
+              <|
+                \_ ->
+                    beta (App (Library.zero "s" "z") (Library.one "s'" "z'"))
+                        |> Expect.equal (Lambda "z" (Var "z"))
             ]
         ]
 

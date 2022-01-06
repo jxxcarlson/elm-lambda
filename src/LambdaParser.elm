@@ -39,11 +39,11 @@ applicationParser aInitial =
 --  exprParser = PT.first exprParser1_ PA.spaces
 
 exprParser1 =
-    PA.oneOf
+    PT.first (PA.oneOf
         [ parenthesized (PA.lazy (\_ -> exprParser1))
         , PA.lazy (\_ -> abstractionParser)
         , variableParser
-        ]
+        ]) PA.spaces
 
 
 leftParen =

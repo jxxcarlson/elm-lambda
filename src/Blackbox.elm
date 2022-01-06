@@ -10,11 +10,13 @@ transform str =
         Err _ -> "Error"
 
 helpText : String
-helpText = """Beta reduce lambda expressions
+helpText = """------------------------------
+Beta reduce lambda expressions
 
 For example,
 
 > (\\x.x)(\\y.y)(\\z.z)
 \\z.z
+------------------------------
 """
 

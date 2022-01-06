@@ -4,3 +4,5 @@ scripts:
   loc: cloc --by-file src
 
   make: elm make --optimize src/Main.elm --output=src/main.js
+
+  cli: node src/repl.js

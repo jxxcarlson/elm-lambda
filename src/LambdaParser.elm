@@ -20,8 +20,19 @@ type alias Parser a =
     Ok (Just (Apply (Lambda "x" (Var "x")) (Lambda "y" (Var "y"))))
 
 -}
-applicationParser =
-    PT.fold (\a b -> Apply b a) expressionParser
+
+
+
+--applicationParser =
+--    PT.fold (\a b -> Apply b a) expressionParser
+
+
+exprParser =
+    expressionParser |> PA.andThen applicationParser2
+
+
+applicationParser2 aInitial =
+    PT.foldWithInitialValue (\a b -> Apply b a) expressionParser aInitial
 
 
 expressionParser =

@@ -1,6 +1,6 @@
 module ParserToolsAdvanced exposing
     ( first
-    , fold
+    , foldWithInitialValue
     , many
     , manyNonEmpty
     , manySeparatedBy
@@ -181,33 +181,55 @@ sequenceAux state =
 
 
 type alias FoldState a =
-    { init : Maybe a, acc : Maybe a }
+    { init : a, acc : Maybe a }
 
 
-fold : (a -> a -> a) -> Parser a -> Parser (Maybe a)
-fold f p =
-    PA.loop { init = Nothing, acc = Nothing } (foldAux f p)
+
+--fold : (a -> a -> a) -> Parser a -> Parser (Maybe a)
+--fold f p =
+--    PA.loop { init = Nothing, acc = Nothing } (foldAux f p)
 
 
-foldAux : (a -> a -> a) -> Parser a -> FoldState a -> Parser (PA.Step (FoldState a) (Maybe a))
+foldWithInitialValue : (a -> a -> a) -> Parser a -> a -> Parser a
+foldWithInitialValue f p a =
+    PA.loop { init = a, acc = Nothing } (foldAux f p)
+
+
+foldAux : (a -> a -> a) -> Parser a -> FoldState a -> Parser (PA.Step (FoldState a) a)
 foldAux f p state =
     PA.oneOf
         [ PA.succeed (\a -> PA.Loop (update f a state))
             |= p
-        , PA.succeed () |> PA.map (\_ -> PA.Done state.acc)
+        , PA.succeed ()
+            |> PA.map
+                (\_ ->
+                    case state.acc of
+                        Nothing ->
+                            PA.Done state.init
+
+                        Just b ->
+                            PA.Done b
+                )
         ]
+
+
+
+--foldAux : (a -> a -> a) -> Parser a -> FoldState a -> Parser (PA.Step (FoldState a) (Maybe a))
+--foldAux f p state =
+--    PA.oneOf
+--        [ PA.succeed (\a -> PA.Loop (update f a state))
+--            |= p
+--        , PA.succeed () |> PA.map (\_ -> PA.Done state.acc)
+--        ]
 
 
 update : (a -> a -> a) -> a -> FoldState a -> FoldState a
 update f a state =
-    case ( state.init, state.acc ) of
-        ( Nothing, _ ) ->
-            { state | init = Just a }
+    case state.acc of
+        Nothing ->
+            { state | acc = Just (f a state.init) }
 
-        ( Just firstA, Nothing ) ->
-            { state | acc = Just (f a firstA) }
-
-        ( Just _, Just b ) ->
+        Just b ->
             { state | acc = Just (f a b) }
 
 

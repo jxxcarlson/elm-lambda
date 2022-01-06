@@ -1,4 +1,4 @@
-module LambdaParser exposing (exprParser)
+module LambdaParser exposing (exprParser, parse)
 
 -- https://mattwetmore.me/posts/parsing-combinators-with-parser-combinators
 -- https://lambdacalc.io/
@@ -13,6 +13,9 @@ import Set
 type alias Parser a =
     PA.Parser Context Problem a
 
+parse : String -> Result (List (PA.DeadEnd Context Problem)) Expr
+parse str =
+   PA.run exprParser str
 
 {-|
 
@@ -23,6 +26,7 @@ type alias Parser a =
     Ok (Lambda "z" (Var "z"))
 
 -}
+exprParser : PA.Parser Context Problem Expr
 exprParser =
     exprParser1 |> PA.andThen applicationParser
 
@@ -30,6 +34,9 @@ exprParser =
 applicationParser aInitial =
     PT.foldWithInitialValue (\a b -> Apply b a) exprParser1 aInitial
 
+
+
+--  exprParser = PT.first exprParser1_ PA.spaces
 
 exprParser1 =
     PA.oneOf

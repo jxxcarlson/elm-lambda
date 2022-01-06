@@ -7,6 +7,7 @@ module Lambda exposing
     , eval
     , freeVariables
     , substitute
+    , toString
     )
 
 -- https://lambdacalc.io/
@@ -20,6 +21,13 @@ type Expr
     | Lambda String Expr
     | Apply Expr Expr
 
+
+toString : Expr -> String
+toString expr =
+    case expr of
+      Var str -> str
+      Lambda binder expr_ -> "\\" ++ binder ++ "." ++ toString expr_
+      Apply e1 e2 ->  "(" ++ toString e1 ++ ")(" ++ toString e2 ++ ")"
 
 type Value
     = Int Int

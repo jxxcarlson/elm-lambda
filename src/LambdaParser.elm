@@ -14,13 +14,21 @@ type alias Parser a =
     PA.Parser Context Problem a
 
 
+{-|
+
+    > PA.run applicationParser "\\x.x(\\y.y)"
+    Ok (Just (Apply (Lambda "x" (Var "x")) (Lambda "y" (Var "y"))))
+
+-}
+applicationParser =
+    PT.fold (\a b -> Apply b a) expressionParser
+
+
 expressionParser =
     PA.oneOf
         [ parenthesized (PA.lazy (\_ -> expressionParser))
         , PA.lazy (\_ -> abstractionParser)
         , variableParser
-
-        --  , Parser.lazy (\_ -> applicationParser1)
         ]
 
 

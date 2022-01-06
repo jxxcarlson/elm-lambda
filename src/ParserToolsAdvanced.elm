@@ -1,7 +1,6 @@
 module ParserToolsAdvanced exposing
-    ( Step(..)
-    , first
-    , loop
+    ( first
+    , fold
     , many
     , manyNonEmpty
     , manySeparatedBy
@@ -181,20 +180,52 @@ sequenceAux state =
             parser |> PA.map (\a -> PA.Loop { state | results = a :: state.results, parsers = List.drop 1 state.parsers })
 
 
-
--- LOOP
-
-
-type Step state a
-    = Loop state
-    | Done a
+type alias FoldState a =
+    { init : Maybe a, acc : Maybe a }
 
 
-loop : state -> (state -> Step state a) -> a
-loop s nextState =
-    case nextState s of
-        Loop s_ ->
-            loop s_ nextState
+fold : (a -> a -> a) -> Parser a -> Parser (Maybe a)
+fold f p =
+    PA.loop { init = Nothing, acc = Nothing } (foldAux f p)
 
-        Done b ->
-            b
+
+foldAux : (a -> a -> a) -> Parser a -> FoldState a -> Parser (PA.Step (FoldState a) (Maybe a))
+foldAux f p state =
+    PA.oneOf
+        [ PA.succeed (\a -> PA.Loop (update f a state))
+            |= p
+        , PA.succeed () |> PA.map (\_ -> PA.Done state.acc)
+        ]
+
+
+update : (a -> a -> a) -> a -> FoldState a -> FoldState a
+update f a state =
+    case ( state.init, state.acc ) of
+        ( Nothing, _ ) ->
+            { state | init = Just a }
+
+        ( Just firstA, Nothing ) ->
+            { state | acc = Just (f a firstA) }
+
+        ( Just _, Just b ) ->
+            { state | acc = Just (f a b) }
+
+
+
+--
+---- LOOP
+--
+--
+--type Step state a
+--    = Loop state
+--    | Done a
+--
+--
+--loop : state -> (state -> Step state a) -> a
+--loop s nextState =
+--    case nextState s of
+--        Loop s_ ->
+--            loop s_ nextState
+--
+--        Done b ->
+--            b

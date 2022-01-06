@@ -1,4 +1,4 @@
-module LambdaParser exposing (..)
+module LambdaParser exposing (exprParser)
 
 -- https://mattwetmore.me/posts/parsing-combinators-with-parser-combinators
 -- https://lambdacalc.io/
@@ -16,28 +16,24 @@ type alias Parser a =
 
 {-|
 
-    > PA.run applicationParser "\\x.x(\\y.y)"
-    Ok (Just (Apply (Lambda "x" (Var "x")) (Lambda "y" (Var "y"))))
+    > run exprParser "\\x.x(\\y.y)(\\z.z)"
+    Ok (Apply (Apply (Lambda "x" (Var "x")) (Lambda "y" (Var "y"))) (Lambda "z" (Var "z")))
+
+    > run exprParser "\\x.x(\\y.y)(\\z.z)" |> Result.map beta
+    Ok (Lambda "z" (Var "z"))
 
 -}
-
-
-
---applicationParser =
---    PT.fold (\a b -> Apply b a) expressionParser
-
-
 exprParser =
-    expressionParser |> PA.andThen applicationParser2
+    exprParser1 |> PA.andThen applicationParser
 
 
-applicationParser2 aInitial =
-    PT.foldWithInitialValue (\a b -> Apply b a) expressionParser aInitial
+applicationParser aInitial =
+    PT.foldWithInitialValue (\a b -> Apply b a) exprParser1 aInitial
 
 
-expressionParser =
+exprParser1 =
     PA.oneOf
-        [ parenthesized (PA.lazy (\_ -> expressionParser))
+        [ parenthesized (PA.lazy (\_ -> exprParser1))
         , PA.lazy (\_ -> abstractionParser)
         , variableParser
         ]
@@ -60,7 +56,7 @@ applicationParser1 =
     PA.succeed (\e1 e2 -> Apply e1 e2)
         |= abstractionParser
         |. PA.spaces
-        |= expressionParser
+        |= exprParser1
         |. PA.spaces
 
 
@@ -69,7 +65,7 @@ abstractionParser =
         |. PA.symbol (PA.Token "\\" ExpectingBackslash)
         |= rawVariableParser
         |. PA.symbol (PA.Token "." ExpectingPeriod)
-        |= expressionParser
+        |= exprParser1
         |. PA.spaces
 
 
@@ -100,10 +96,3 @@ text prefix continue =
         |. PA.chompWhile (\c -> continue c)
         |= PA.getOffset
         |= PA.getSource
-
-
-
---type alias ErrorData =
---    List (LambdaParser.Advanced.DeadEnd Context Problem)
---type Step state a
---    = Loop state

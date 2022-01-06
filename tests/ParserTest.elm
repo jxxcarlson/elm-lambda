@@ -15,15 +15,15 @@ suite =
         [ describe "parser"
             [ test "parse variable" <|
                 \_ ->
-                    run expressionParser "a b c"
+                    run exprParser1 "a b c"
                         |> Expect.equal (Ok (Var "a"))
             , test "parse abstraction" <|
                 \_ ->
-                    run expressionParser "\\x.x"
+                    run exprParser1 "\\x.x"
                         |> Expect.equal (Ok (Lambda "x" (Var "x")))
             , test "parse two abstractions" <|
                 \_ ->
-                    run expressionParser "\\x.\\y.z"
+                    run exprParser1 "\\x.\\y.z"
                         |> Expect.equal (Ok (Lambda "x" (Lambda "y" (Var "z"))))
             ]
         ]

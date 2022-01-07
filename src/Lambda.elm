@@ -5,9 +5,9 @@ module Lambda exposing
     , beta
     , boundVariables
     , call
-    , collision
     , eval
     , freeVariables
+    , freshenVariables
     , isNormal
     , renameVariable
     , substitute
@@ -109,24 +109,35 @@ variables expr =
             Set.union (variables e1) (variables e2)
 
 
-collision : Expr -> Expr -> Set String
-collision e1 e2 =
-    Set.intersect (boundVariables e1) (freeVariables e2)
+freshenVariables : Expr -> Expr -> Expr
+freshenVariables expr1 expr2 =
+    freshenVariablesAux (variables expr2 |> Set.toList) expr1
 
 
+freshenVariablesAux : List String -> Expr -> Expr
+freshenVariablesAux avoid expr =
+    case List.head avoid of
+        Nothing ->
+            expr
 
---
---avoidCollision : Expr -> Expr -> Expr
---avoidCollision e1 e2 =
---    case collision e1 e2 |> Set.toList of
---        [] ->
---            e1
---
---        (x::rest) -> rename x (freeVariables e2 |> Set.toList) e1
---
---rename : String -> List String -> Expr -> Expr
---rename x xs expr =
---    changeName x
+        Just x ->
+            let
+                xx =
+                    fresh x avoid
+
+                newExpr =
+                    renameVariable x xx expr
+            in
+            freshenVariablesAux (List.drop 1 avoid) newExpr
+
+
+freshenVariable : String -> Expr -> Expr -> Expr
+freshenVariable x expr1 expr2 =
+    let
+        xx =
+            fresh x (variables expr2 |> Set.toList)
+    in
+    renameVariable x xx expr1
 
 
 renameVariable : String -> String -> Expr -> Expr
@@ -148,6 +159,28 @@ renameVariable a b expr =
 
         Apply e1 e2 ->
             Apply (renameVariable a b e1) (renameVariable a b e2)
+
+
+fresh : String -> List String -> String
+fresh str avoid =
+    if List.member str avoid then
+        freshAux 0 str avoid
+
+    else
+        str
+
+
+freshAux : Int -> String -> List String -> String
+freshAux count str avoid =
+    let
+        newStr =
+            str ++ String.fromInt count
+    in
+    if List.member newStr avoid then
+        freshAux (count + 1) str avoid
+
+    else
+        newStr
 
 
 substitute : Expr -> String -> Expr -> Expr
@@ -175,7 +208,11 @@ beta : Expr -> Expr
 beta expr =
     case expr of
         Apply (Lambda x e1) e2 ->
-            beta (substitute e2 x e1)
+            let
+                e2Fresh =
+                    freshenVariables e2 e1
+            in
+            beta (substitute e2Fresh x e1)
 
         Lambda x e ->
             Lambda x (beta e)

@@ -41,6 +41,18 @@ Commands
 
 :let a b       # store b in the variable a
 
+Example
+-------
+> :let first \\x.\\y.x
+> first
+  \\x.\\y.x
+> :let second \\x.\\y.y
+> (first)(second)
+  \\y.\\x0.\\y0.y0
+> (second)(first)
+  \\y.y
 
+Use parentheses to ensure that first is applied
+to second and vice versa.
 ----------------------------------------------------
 """

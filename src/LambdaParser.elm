@@ -93,7 +93,8 @@ abstractionParser =
         |. PA.symbol (PA.Token "\\" ExpectingBackslash)
         |= rawVariableParser
         |. PA.symbol (PA.Token "." ExpectingPeriod)
-        |= exprParser1
+        -- |= exprParser1
+        |= PA.lazy (\_ -> exprParser)
         |. PA.spaces
 
 

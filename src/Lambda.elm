@@ -3,11 +3,16 @@ module Lambda exposing
     , Expr(..)
     , Value(..)
     , beta
+    , boundVariables
     , call
+    , collision
     , eval
     , freeVariables
+    , isNormal
+    , renameVariable
     , substitute
     , toString
+    , variables
     )
 
 -- https://lambdacalc.io/
@@ -25,9 +30,15 @@ type Expr
 toString : Expr -> String
 toString expr =
     case expr of
-      Var str -> str
-      Lambda binder expr_ -> "\\" ++ binder ++ "." ++ toString expr_
-      Apply e1 e2 ->  "(" ++ toString e1 ++ ")(" ++ toString e2 ++ ")"
+        Var str ->
+            str
+
+        Lambda binder expr_ ->
+            "\\" ++ binder ++ "." ++ toString expr_
+
+        Apply e1 e2 ->
+            "(" ++ toString e1 ++ ")(" ++ toString e2 ++ ")"
+
 
 type Value
     = Int Int
@@ -80,6 +91,65 @@ freeVariables expr =
             Set.union (freeVariables e1) (freeVariables e2)
 
 
+boundVariables : Expr -> Set String
+boundVariables expr =
+    Set.diff (variables expr) (freeVariables expr)
+
+
+variables : Expr -> Set String
+variables expr =
+    case expr of
+        Var str ->
+            Set.singleton str
+
+        Lambda name body ->
+            Set.union (variables body) (Set.singleton name)
+
+        Apply e1 e2 ->
+            Set.union (variables e1) (variables e2)
+
+
+collision : Expr -> Expr -> Set String
+collision e1 e2 =
+    Set.intersect (boundVariables e1) (freeVariables e2)
+
+
+
+--
+--avoidCollision : Expr -> Expr -> Expr
+--avoidCollision e1 e2 =
+--    case collision e1 e2 |> Set.toList of
+--        [] ->
+--            e1
+--
+--        (x::rest) -> rename x (freeVariables e2 |> Set.toList) e1
+--
+--rename : String -> List String -> Expr -> Expr
+--rename x xs expr =
+--    changeName x
+
+
+renameVariable : String -> String -> Expr -> Expr
+renameVariable a b expr =
+    case expr of
+        Var x ->
+            if x == a then
+                Var b
+
+            else
+                expr
+
+        Lambda x body ->
+            if x == a then
+                Lambda b (renameVariable a b body)
+
+            else
+                Lambda x (renameVariable a b body)
+
+        Apply e1 e2 ->
+            Apply (renameVariable a b e1) (renameVariable a b e2)
+
+
 substitute : Expr -> String -> Expr -> Expr
 substitute expr1 x expr2 =
     case expr2 of
@@ -111,7 +181,12 @@ beta expr =
             Lambda x (beta e)
 
         Apply e f ->
-            beta (Apply (beta e) f)
+            Apply (beta e) (beta f)
 
         _ ->
             expr
+
+
+isNormal : Expr -> Bool
+isNormal expr =
+    beta expr == expr

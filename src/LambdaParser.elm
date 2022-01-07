@@ -1,4 +1,4 @@
-module LambdaParser exposing (exprParser, parse)
+module LambdaParser exposing (exprParser, parse, unsafeParse)
 
 -- https://mattwetmore.me/posts/parsing-combinators-with-parser-combinators
 -- https://lambdacalc.io/
@@ -13,9 +13,26 @@ import Set
 type alias Parser a =
     PA.Parser Context Problem a
 
+
 parse : String -> Result (List (PA.DeadEnd Context Problem)) Expr
 parse str =
-   PA.run exprParser str
+    PA.run exprParser str
+
+
+unsafeParse : String -> Expr
+unsafeParse str =
+    case parse str of
+        Ok expr ->
+            expr
+
+        Err _ ->
+            id
+
+
+id : Expr
+id =
+    Lambda "x" (Var "x")
+
 
 {-|
 
@@ -38,12 +55,16 @@ applicationParser aInitial =
 
 --  exprParser = PT.first exprParser1_ PA.spaces
 
+
 exprParser1 =
-    PT.first (PA.oneOf
-        [ parenthesized (PA.lazy (\_ -> exprParser1))
-        , PA.lazy (\_ -> abstractionParser)
-        , variableParser
-        ]) PA.spaces
+    PT.first
+        (PA.oneOf
+            [ parenthesized (PA.lazy (\_ -> exprParser1))
+            , PA.lazy (\_ -> abstractionParser)
+            , variableParser
+            ]
+        )
+        PA.spaces
 
 
 leftParen =

@@ -1,7 +1,19 @@
-module Blackbox exposing (transform, helpText)
+module Blackbox exposing (applySubstitutions, transform, helpText)
 
 import LambdaParser  exposing(parse)
 import Lambda
+import Dict exposing(Dict)
+
+
+applySubstitutions : List (String, String) -> String -> String
+applySubstitutions substitutions str =
+    List.foldl (\(a, b) s -> String.replace a b s) str substitutions
+
+subs = [
+    ("first", "\\x.\\y.x")
+  , ("second", "\\x.\\y.y")
+  ]
+
 
 transform : String -> String
 transform str =

@@ -1,12 +1,11 @@
 port module Main exposing (main)
 
+import Blackbox
 import Cmd.Extra exposing (withCmd, withCmds, withNoCmd)
 import Json.Decode as D
 import Json.Encode as E
 import List.Extra
 import Platform exposing (Program)
-import Blackbox
-
 
 
 port get : (String -> msg) -> Sub msg
@@ -31,7 +30,7 @@ main =
 
 
 type alias Model =
-    { residualCommand : String, fileContents : Maybe String }
+    { residualCommand : String, fileContents : Maybe String, substitutions : List ( String, String ) }
 
 
 type Msg
@@ -45,7 +44,7 @@ type alias Flags =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    { residualCommand = "", fileContents = Nothing } |> withNoCmd
+    { residualCommand = "", fileContents = Nothing, substitutions = [] } |> withNoCmd
 
 
 subscriptions : Model -> Sub Msg
@@ -62,6 +61,7 @@ update msg model =
                     model |> withNoCmd
 
                 False ->
+                    -- process user input
                     processCommand { model | residualCommand = getResidualCmd input } input
 
         ReceivedDataFromJS value ->
@@ -103,6 +103,14 @@ processCommand model cmdString =
         Just ":help" ->
             model |> withCmd (put Blackbox.helpText)
 
+        Just ":let" ->
+            case List.drop 1 args |> listToPair of
+                Nothing ->
+                    model |> withCmd (put "Use exactly two arguments")
+
+                Just ( a, b ) ->
+                    { model | substitutions = ( a, b ) :: model.substitutions } |> withCmd (put <| "added " ++ a ++ " as " ++ b)
+
         Just ":get" ->
             loadFile model arg
 
@@ -142,7 +150,13 @@ processCommand model cmdString =
                     model |> withCmd (put (Blackbox.transform <| (residualArgs ++ removeComments str)))
 
         _ ->
-            model |> withCmd (put <| Blackbox.transform (removeComments cmdString))
+            -- return default output
+            model |> withCmd (put <| Blackbox.transform (removeComments (applySubstitutions model.substitutions cmdString)))
+
+
+applySubstitutions : List ( String, String ) -> String -> String
+applySubstitutions substitutions str =
+    List.foldl (\( a, b ) s -> String.replace a b s) str substitutions
 
 
 
@@ -239,3 +253,13 @@ tail k input =
     lines
         |> List.drop (n - k - 1)
         |> String.join "\n"
+
+
+listToPair : List a -> Maybe ( a, a )
+listToPair list =
+    case list of
+        x :: y :: [] ->
+            Just ( x, y )
+
+        _ ->
+            Nothing

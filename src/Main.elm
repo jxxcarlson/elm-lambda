@@ -129,16 +129,6 @@ processCommand model cmdString =
         Just ":show" ->
             model |> withCmd (put (model.fileContents |> Maybe.withDefault "no file loaded"))
 
-        Just ":head" ->
-            model
-                |> withCmd
-                    (put (headOfFile model))
-
-        Just ":tail" ->
-            model
-                |> withCmd
-                    (put (tailOfFile model))
-
         Just ":calc" ->
             -- Apply Blackbox.transform with residual arguments to the contents of memory
             -- E.g, if the input is ":calc column=5:csv" then residualArgs = ":column=5:csv"
@@ -231,40 +221,6 @@ removeComments input =
         |> List.filter (\line -> String.left 1 line /= "#")
         |> String.join "\n"
         |> String.trim
-
-
-headOfFile model =
-    model.fileContents
-        |> Maybe.map (head 5)
-        |> Maybe.withDefault "no file loaded"
-
-
-tailOfFile model =
-    model.fileContents
-        |> Maybe.map (tail 5)
-        |> Maybe.withDefault "no file loaded"
-
-
-head : Int -> String -> String
-head k input =
-    input
-        |> String.lines
-        |> List.take k
-        |> String.join "\n"
-
-
-tail : Int -> String -> String
-tail k input =
-    let
-        lines =
-            String.lines input
-
-        n =
-            List.length lines
-    in
-    lines
-        |> List.drop (n - k - 1)
-        |> String.join "\n"
 
 
 listToPair : List a -> Maybe ( a, a )

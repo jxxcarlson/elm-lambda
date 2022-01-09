@@ -39,9 +39,11 @@ For example,
 ----------------------------------------------------
 Commands
 
-:let a b         # store b in the variable a
 :load defs.txt   # load definitions file
 :reset           # reset definitions
+:show            # display file contents
+
+:let a b         # store b in the variable a
 :parse STR       # parse STR to Expr
 
 Examples

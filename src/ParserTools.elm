@@ -9,10 +9,16 @@ module ParserTools exposing
     , sequence
     , string
     , textPS
+    , word
     )
 
 import Parser exposing ((|.), (|=), Parser)
 import Problem exposing (Context(..), Problem(..))
+
+
+word : Parser String
+word =
+    textPS Char.isAlpha [ ' ' ] |> Parser.map (\value -> value.content)
 
 
 string : String -> Parser String

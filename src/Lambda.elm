@@ -37,7 +37,8 @@ toString expr =
             "\\" ++ binder ++ "." ++ toString expr_
 
         Apply e1 e2 ->
-            "(" ++ toString e1 ++ ")(" ++ toString e2 ++ ")"
+            -- "(" ++ toString e1 ++ ")(" ++ toString e2 ++ ")"
+            toString e1 ++ " " ++ toString e2
 
 
 type Value

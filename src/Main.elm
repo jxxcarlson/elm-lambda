@@ -2,8 +2,10 @@ port module Main exposing (main)
 
 import Blackbox
 import Cmd.Extra exposing (withCmd, withCmds, withNoCmd)
+import Defs
 import Json.Decode as D
 import Json.Encode as E
+import LambdaParser
 import List.Extra
 import Platform exposing (Program)
 
@@ -69,19 +71,23 @@ update msg model =
                 Nothing ->
                     model |> withCmd (put "Couldn't load file")
 
-                Just data ->
+                Just data_ ->
                     let
-                        input =
+                        data =
                             -- If there is a residual command, prepend it to the
                             -- input before sending the input to the black box.
                             case model.residualCommand == "" of
                                 True ->
-                                    removeComments data
+                                    removeComments data_
 
                                 False ->
-                                    ":" ++ model.residualCommand ++ " " ++ removeComments data
+                                    ":" ++ model.residualCommand ++ " " ++ removeComments data_
+
+                        substitutions =
+                            Defs.install data []
                     in
-                    { model | fileContents = Just data } |> withCmd (put <| Blackbox.transform input)
+                    -- { model | fileContents = Just data } |> withCmd (put <| "Data read: " ++ String.fromInt (String.length input))
+                    { model | fileContents = Just data_, substitutions = substitutions } |> withCmd (put <| data)
 
 
 processCommand : Model -> String -> ( Model, Cmd Msg )
@@ -111,8 +117,14 @@ processCommand model cmdString =
                 Just ( a, b ) ->
                     { model | substitutions = ( a, b ) :: model.substitutions } |> withCmd (put <| "added " ++ a ++ " as " ++ b)
 
-        Just ":get" ->
+        Just ":load" ->
             loadFile model arg
+
+        Just ":reset" ->
+            { model | substitutions = [] } |> withCmd (put "reset: done")
+
+        Just ":parse" ->
+            model |> withCmd (put (Debug.toString (LambdaParser.parse (List.drop 1 args |> String.join " "))))
 
         Just ":show" ->
             model |> withCmd (put (model.fileContents |> Maybe.withDefault "no file loaded"))

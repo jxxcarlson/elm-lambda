@@ -1,0 +1,8 @@
+id      \x.x
+true    \x.\y.x
+false   \x.\y.y
+zero    \s.\z.z
+one     \s.\z.s z
+two     \s.\z.s s z
+
+

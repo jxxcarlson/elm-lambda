@@ -39,9 +39,12 @@ For example,
 ----------------------------------------------------
 Commands
 
-:let a b       # store b in the variable a
+:let a b         # store b in the variable a
+:load defs.txt   # load definitions file
+:reset           # reset definitions
+:parse STR       # parse STR to Expr
 
-Example
+Examples
 -------
 > :let first \\x.\\y.x
 > first
@@ -52,7 +55,10 @@ Example
 > (second)(first)
   \\y.y
 
-Use parentheses to ensure that first is applied
+> :parse \\s.\\z.s s z
+Ok (Lambda "s" (Lambda "z" (Apply (Apply (Var "s") (Var "s")) (Var "z"))))
+
+Note: Use parentheses to ensure that first is applied
 to second and vice versa.
 ----------------------------------------------------
 """

@@ -6,7 +6,7 @@ import LambdaParser exposing (parse)
 
 transform : String -> String
 transform str =
-    case str |> Debug.log "STR" |> parse |> Result.map (Lambda.beta >> Lambda.toString) of
+    case str |> parse |> Result.map (Lambda.beta >> Lambda.toString) of
         Ok output ->
             output
 
@@ -30,6 +30,8 @@ Commands
 :load defs.txt   # load definitions file
 :reset           # reset definitions
 :show            # display file contents
+:raw             # raw output, e.g., \\x.x
+:pretty          # pretty output, e.g., λx.x
 
 :let a b         # store b in the variable a
 :parse STR       # parse STR to Expr

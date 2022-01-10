@@ -7,6 +7,7 @@ module Lambda exposing
     , isNormal
     , renameVariable
     , substitute
+    , toRawString
     , toString
     , variables
     )
@@ -22,6 +23,19 @@ type Expr
     | Apply Expr Expr
 
 
+toRawString : Expr -> String
+toRawString expr =
+    case expr of
+        Var str ->
+            str
+
+        Lambda binder expr_ ->
+            "\\" ++ binder ++ "." ++ toRawString expr_
+
+        Apply e1 e2 ->
+            toRawString e1 ++ " " ++ toRawString e2
+
+
 toString : Expr -> String
 toString expr =
     case expr of
@@ -29,7 +43,7 @@ toString expr =
             str
 
         Lambda binder expr_ ->
-            "\\" ++ binder ++ "." ++ toString expr_
+            String.fromChar 'λ' ++ binder ++ "." ++ toString expr_
 
         Apply e1 e2 ->
             toString e1 ++ " " ++ toString e2

@@ -4,6 +4,7 @@ module Problem exposing (..)
 type Problem
     = ExpectingPrefix
     | ExpectingBackslash
+    | ExpectingLambdaCharacter
     | ExpectingPeriod
     | ExpectingSymbol String
     | EndOfInput

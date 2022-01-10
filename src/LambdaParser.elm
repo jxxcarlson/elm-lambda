@@ -87,7 +87,7 @@ applicationParser1 =
 
 abstractionParser =
     PA.succeed (\var expr -> Lambda var expr)
-        |. PA.symbol (PA.Token "\\" ExpectingBackslash)
+        |. PA.oneOf [ PA.symbol (PA.Token (String.fromChar 'λ') ExpectingLambdaCharacter), PA.symbol (PA.Token "\\" ExpectingBackslash) ]
         |= rawVariableParser
         |. PA.symbol (PA.Token "." ExpectingPeriod)
         -- |= exprParser1

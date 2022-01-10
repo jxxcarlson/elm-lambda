@@ -32,7 +32,16 @@ main =
 
 
 type alias Model =
-    { residualCommand : String, fileContents : Maybe String, substitutions : List ( String, String ) }
+    { residualCommand : String
+    , fileContents : Maybe String
+    , substitutions : List ( String, String )
+    , viewStyle : ViewStyle
+    }
+
+
+type ViewStyle
+    = Raw
+    | Pretty
 
 
 type Msg
@@ -46,7 +55,12 @@ type alias Flags =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    { residualCommand = "", fileContents = Nothing, substitutions = [] } |> withNoCmd
+    { residualCommand = ""
+    , fileContents = Nothing
+    , substitutions = []
+    , viewStyle = Pretty
+    }
+        |> withNoCmd
 
 
 subscriptions : Model -> Sub Msg
@@ -87,7 +101,17 @@ update msg model =
                             Defs.install data []
                     in
                     -- { model | fileContents = Just data } |> withCmd (put <| "Data read: " ++ String.fromInt (String.length input))
-                    { model | fileContents = Just data_, substitutions = substitutions } |> withCmd (put <| data)
+                    { model | fileContents = Just data_, substitutions = substitutions } |> withCmd (put <| transformOutput model.viewStyle <| data)
+
+
+transformOutput : ViewStyle -> String -> String
+transformOutput viewStyle str =
+    case viewStyle of
+        Raw ->
+            str
+
+        Pretty ->
+            String.replace "\\" (String.fromChar 'λ') str
 
 
 processCommand : Model -> String -> ( Model, Cmd Msg )
@@ -115,7 +139,13 @@ processCommand model cmdString =
                     model |> withCmd (put "Use exactly two arguments")
 
                 Just ( a, b ) ->
-                    { model | substitutions = ( a, b ) :: model.substitutions } |> withCmd (put <| "added " ++ a ++ " as " ++ b)
+                    { model | substitutions = ( a, b ) :: model.substitutions } |> withCmd (put <| "added " ++ a ++ " as " ++ transformOutput model.viewStyle b)
+
+        Just ":raw" ->
+            { model | viewStyle = Raw } |> withCmd (put "view style = raw")
+
+        Just ":pretty" ->
+            { model | viewStyle = Pretty } |> withCmd (put "view style = pretty")
 
         Just ":load" ->
             loadFile model arg
@@ -127,7 +157,7 @@ processCommand model cmdString =
             model |> withCmd (put (Debug.toString (LambdaParser.parse (List.drop 1 args |> String.join " "))))
 
         Just ":show" ->
-            model |> withCmd (put (model.fileContents |> Maybe.withDefault "no file loaded"))
+            model |> withCmd (put (model.fileContents |> Maybe.withDefault "no file loaded" |> transformOutput model.viewStyle))
 
         Just ":calc" ->
             -- Apply Blackbox.transform with residual arguments to the contents of memory
@@ -149,11 +179,11 @@ processCommand model cmdString =
                                         |> String.join " "
                                         |> (\x -> ":" ++ x ++ "\n")
                     in
-                    model |> withCmd (put (Blackbox.transform <| (residualArgs ++ removeComments str)))
+                    model |> withCmd (put <| transformOutput model.viewStyle <| (Blackbox.transform <| (residualArgs ++ removeComments str)))
 
         _ ->
             -- return default output
-            model |> withCmd (put <| Blackbox.transform (removeComments (applySubstitutions model.substitutions cmdString)))
+            model |> withCmd (put <| transformOutput model.viewStyle <| Blackbox.transform (removeComments (applySubstitutions model.substitutions cmdString)))
 
 
 applySubstitutions : List ( String, String ) -> String -> String

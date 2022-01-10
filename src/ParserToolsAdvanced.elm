@@ -96,14 +96,14 @@ second p q =
 
 {-|
 
-    > parenthesized p = middle (Parser.symbol "(") p (Parser.symbol ")")
-    > <function> : Parser.Parser b -> Parser.Parser b
+    > parenthesized p = middle (LambdaParser.symbol "(") p (LambdaParser.symbol ")")
+    > <function> : LambdaParser.LambdaParser b -> LambdaParser.LambdaParser b
 
-    > pint = parenthesized Parser.int
-    > Parser <function> : Parser.Parser Int
+    > pint = parenthesized LambdaParser.int
+    > LambdaParser <function> : LambdaParser.LambdaParser Int
 
     > run pint "(2)"
-    > Ok 2 : Result (List Parser.DeadEnd) Int
+    > Ok 2 : Result (List LambdaParser.DeadEnd) Int
 
 -}
 middle : Parser a -> Parser b -> Parser c -> Parser b
@@ -138,27 +138,27 @@ textPS prefixTest stopChars =
 
     > type Expr = String String | Int Int
 
-    > stringExpr str = (first (string str) Parser.spaces) |> Parser.map String
-    <function> : String -> Parser.Parser Expr
+    > stringExpr str = (first (string str) LambdaParser.spaces) |> LambdaParser.map String
+    <function> : String -> LambdaParser.LambdaParser Expr
 
     > run (stringExpr "a") "a b c"
-    Ok (String "a") : Result (List Parser.DeadEnd) Expr
+    Ok (String "a") : Result (List LambdaParser.DeadEnd) Expr
 
-    > intExpr = first Parser.int Parser.spaces |> Parser.map Int
-    Parser <function> : Parser.Parser Int
+    > intExpr = first LambdaParser.int LambdaParser.spaces |> LambdaParser.map Int
+    LambdaParser <function> : LambdaParser.LambdaParser Int
 
-    > intExpr = (first Parser.int Parser.spaces) |> Parser.map Int
-    Parser <function> : Parser.Parser Expr
+    > intExpr = (first LambdaParser.int LambdaParser.spaces) |> LambdaParser.map Int
+    LambdaParser <function> : LambdaParser.LambdaParser Expr
 
-    > xOrY = Parser.oneOf [stringExpr "x", stringExpr "y"]
-    Parser <function> : Parser.Parser Expr
+    > xOrY = LambdaParser.oneOf [stringExpr "x", stringExpr "y"]
+    LambdaParser <function> : LambdaParser.LambdaParser Expr
 
     > run (sequence [xOrY, intExpr]) "x 2"
     Ok
 
     > run (many (sequence [xOrY, intExpr])) "x 1 y 2 x 3 x 4 y 5"
     Ok [[String "x",Int 1],[String "y",Int 2],[String "x",Int 3],[String "x",Int 4],[String "y",Int 5]]
-        : Result (List Parser.DeadEnd) (List (List Expr))
+        : Result (List LambdaParser.DeadEnd) (List (List Expr))
 
 -}
 sequence : List (Parser a) -> Parser (List a)
@@ -185,7 +185,7 @@ type alias FoldState a =
 
 
 
---fold : (a -> a -> a) -> Parser a -> Parser (Maybe a)
+--fold : (a -> a -> a) -> LambdaParser a -> LambdaParser (Maybe a)
 --fold f p =
 --    PA.loop { init = Nothing, acc = Nothing } (foldAux f p)
 
@@ -214,7 +214,7 @@ foldAux f p state =
 
 
 
---foldAux : (a -> a -> a) -> Parser a -> FoldState a -> Parser (PA.Step (FoldState a) (Maybe a))
+--foldAux : (a -> a -> a) -> LambdaParser a -> FoldState a -> LambdaParser (PA.Step (FoldState a) (Maybe a))
 --foldAux f p state =
 --    PA.oneOf
 --        [ PA.succeed (\a -> PA.Loop (update f a state))

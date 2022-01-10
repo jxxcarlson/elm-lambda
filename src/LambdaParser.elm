@@ -1,13 +1,10 @@
-module LambdaParser exposing (exprParser, parse, unsafeParse)
-
--- https://mattwetmore.me/posts/parsing-combinators-with-parser-combinators
--- https://lambdacalc.io/
+module LambdaParser exposing (..)
 
 import Lambda exposing (Expr(..))
 import Parser.Advanced as PA exposing ((|.), (|=))
 import ParserToolsAdvanced as PT
 import Problem exposing (Context, Problem(..))
-import Set
+import Set exposing (Set)
 
 
 type alias Parser a =
@@ -99,10 +96,10 @@ abstractionParser =
 
 
 
---variableParser : PA.Parser Context Problem Expr
+--variableParser : PA.LambdaParser Context Problem Expr
 --variableParser =
 --    text Char.isAlpha (\c -> not <| List.member c [ '.', ' ', '\n' ]) |> PA.map Var
---variableParser : PA.Parser Context Problem Expr
+--variableParser : PA.LambdaParser Context Problem Expr
 --variableParser =
 --    PT.textPS Char.isAlpha [ '.', ' ', '\n' ] |> PA.map ((\val -> val.content) >> Var)
 

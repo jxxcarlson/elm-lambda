@@ -1,11 +1,7 @@
 module Lambda exposing
-    ( Env
-    , Expr(..)
-    , Value(..)
+    ( Expr(..)
     , beta
     , boundVariables
-    , call
-    , eval
     , freeVariables
     , freshenVariables
     , isNormal
@@ -17,7 +13,6 @@ module Lambda exposing
 
 -- https://lambdacalc.io/
 
-import Dict exposing (Dict)
 import Set exposing (Set)
 
 
@@ -37,42 +32,7 @@ toString expr =
             "\\" ++ binder ++ "." ++ toString expr_
 
         Apply e1 e2 ->
-            -- "(" ++ toString e1 ++ ")(" ++ toString e2 ++ ")"
             toString e1 ++ " " ++ toString e2
-
-
-type Value
-    = Int Int
-    | Str String
-    | Err String
-    | Closure String Expr Env
-
-
-type alias Env =
-    Dict String Value
-
-
-eval : Expr -> Env -> Value
-eval expr env =
-    case expr of
-        Var name ->
-            Dict.get name env |> Maybe.withDefault (Err "Variable not defined")
-
-        Lambda name body ->
-            Closure name body env
-
-        Apply operator operand ->
-            call (eval operator env) (eval operand env)
-
-
-call : Value -> Value -> Value
-call f x =
-    case f of
-        Closure name expr env ->
-            eval expr (Dict.insert name x env)
-
-        _ ->
-            Err "I can only call functions"
 
 
 

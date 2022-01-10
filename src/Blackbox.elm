@@ -1,24 +1,12 @@
-module Blackbox exposing (applySubstitutions, helpText, transform)
+module Blackbox exposing (helpText, transform)
 
-import Dict exposing (Dict)
 import Lambda
 import LambdaParser exposing (parse)
 
 
-applySubstitutions : List ( String, String ) -> String -> String
-applySubstitutions substitutions str =
-    List.foldl (\( a, b ) s -> String.replace a b s) str substitutions
-
-
-subs =
-    [ ( "first", "\\x.\\y.x" )
-    , ( "second", "\\x.\\y.y" )
-    ]
-
-
 transform : String -> String
 transform str =
-    case str |> parse |> Result.map (Lambda.beta >> Lambda.toString) of
+    case str |> Debug.log "STR" |> parse |> Result.map (Lambda.beta >> Lambda.toString) of
         Ok output ->
             output
 

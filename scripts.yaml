@@ -2,9 +2,10 @@
 
 scripts:
 
-  loc: cloc --by-file src
-
-  optimize: elm make --optimize src/Main.elm --output=src/main.js
+  loc:
+    - rm src/main.js
+    - cloc --by-file src
+    - elm make src/Main.elm --output=src/main.js
 
   make: elm make src/Main.elm --output=src/main.js
 

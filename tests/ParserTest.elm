@@ -10,7 +10,7 @@ import Test exposing (..)
 suite : Test
 suite =
     Test.only <|
-        describe "Lambda Parser"
+        describe "Lambda LambdaParser"
             [ describe "parser"
                 [ test "parse variable" <|
                     \_ ->

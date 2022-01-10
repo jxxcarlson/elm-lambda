@@ -179,7 +179,7 @@ beta expr =
             Lambda x (beta e)
 
         Apply e f ->
-            Apply (beta e) (beta f)
+            beta (Apply (beta e) (beta f))
 
         _ ->
             expr

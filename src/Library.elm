@@ -1,6 +1,7 @@
 module Library exposing (..)
 
 import Dict
+import Eval exposing (..)
 import Lambda exposing (..)
 
 

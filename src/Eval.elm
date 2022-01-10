@@ -1,4 +1,4 @@
-module Eval exposing (Value(..), env1, eval)
+module Eval exposing (Env, Value(..), env1, eval)
 
 import Dict exposing (Dict)
 import Lambda exposing (Expr(..))

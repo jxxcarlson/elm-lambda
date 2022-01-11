@@ -1,3 +1,7 @@
 first     \x.\y.x
 second    \x.\y.y
 id        \x.x
+a         \x.\y.x \u.u
+b         (\x.\y.x)\u.u
+
+

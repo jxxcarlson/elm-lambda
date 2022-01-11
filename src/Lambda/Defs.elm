@@ -43,4 +43,4 @@ definitionParser =
 
 lambda : Parser String
 lambda =
-    PT.textPS (\c -> Char.isAlpha c || c == '\\') [ '\n' ] |> Parser.map (\value -> value.content)
+    PT.textPS (\c -> Char.isAlpha c || c == '\\' || c == '(') [ '\n' ] |> Parser.map (\value -> value.content)

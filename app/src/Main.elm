@@ -5,6 +5,7 @@ import Cmd.Extra exposing (withCmd, withCmds, withNoCmd)
 import Json.Decode as D
 import Json.Encode as E
 import Lambda.Defs as Defs
+import Lambda.Lambda as Lambda
 import Lambda.LambdaParser as LambdaParser
 import List.Extra
 import Platform exposing (Program)
@@ -136,7 +137,6 @@ processCommand model cmdString =
             String.split " " cmdString
                 |> List.map String.trim
                 |> List.filter (\item -> item /= "")
-                |> Debug.log "ARGS"
 
         cmd =
             List.head args
@@ -148,6 +148,20 @@ processCommand model cmdString =
     case cmd of
         Just ":help" ->
             model |> withCmd (put Blackbox.helpText)
+
+        Just ":examples" ->
+            model |> withCmd (put Blackbox.examplesText)
+
+        Just ":normal" ->
+            case args of
+                ":normal" :: [] ->
+                    model |> withCmd (put "Need one more argument")
+
+                ":normal" :: rest ->
+                    isNormal model (String.join " " rest)
+
+                _ ->
+                    model |> withCmd (put "Error")
 
         Just ":let" ->
             case args of
@@ -189,40 +203,34 @@ processCommand model cmdString =
         Just ":defs" ->
             model |> withCmd (put (prettifyPairList model.substitutions))
 
-        Just ":calc" ->
-            -- Apply Blackbox.transform with residual arguments to the contents of memory
-            -- E.g, if the input is ":calc column=5:csv" then residualArgs = ":column=5:csv"
-            case model.fileContents of
-                Nothing ->
-                    model |> withCmd (put (model.fileContents |> Maybe.withDefault "no file loaded"))
-
-                Just str ->
-                    let
-                        residualArgs =
-                            case args == [ ":calc" ] of
-                                True ->
-                                    ""
-
-                                False ->
-                                    args
-                                        |> List.drop 1
-                                        |> String.join " "
-                                        |> (\x -> ":" ++ x ++ "\n")
-                    in
-                    model |> withCmd (put <| transformOutput model.viewStyle <| (Blackbox.transform <| (residualArgs ++ removeComments str)))
-
         _ ->
             -- return default output
-            model |> withCmd (put <| transformOutput model.viewStyle <| Blackbox.transform (applySubstitutions model.substitutions (Debug.log "CMD STRING" cmdString)))
+            betaReduce model cmdString
 
 
+betaReduce model str =
+    model |> withCmd (put <| transformOutput model.viewStyle <| Blackbox.transform (applySubstitutions model.substitutions str))
 
--- model |> withCmd (put <| transformOutput model.viewStyle <| Blackbox.transform (removeComments cmdString))
+
+isNormal model str =
+    let
+        output =
+            case Result.map Lambda.isNormal (LambdaParser.parse str) of
+                Ok True ->
+                    "true"
+
+                Ok False ->
+                    "false"
+
+                Err _ ->
+                    "Error"
+    in
+    model |> withCmd (put <| output)
 
 
 applySubstitutions : List ( String, String ) -> String -> String
 applySubstitutions substitutions str =
-    List.foldl (\( a, b ) s -> String.replace a b s) (Debug.log "STR" str) (Debug.log "SUBST LIST" substitutions) |> Debug.log "SUBS"
+    List.foldl (\( a, b ) s -> String.replace a b s) str substitutions
 
 
 

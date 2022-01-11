@@ -6,4 +6,6 @@ scripts:
 
   make: elm make src/Main.elm --output=src/main.js
 
-  cli: node src/repl.js
+  cli:
+    - elm make src/Main.elm --output=src/main.js
+    - node src/repl.js

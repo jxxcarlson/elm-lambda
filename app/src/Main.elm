@@ -5,7 +5,7 @@ import Json.Decode as D
 import Json.Encode as E
 import Lambda.Defs as Defs
 import Lambda.Lambda as Lambda
-import Lambda.LambdaParser as LambdaParser
+import Lambda.Parser exposing (parse)
 import List.Extra
 import Platform exposing (Program)
 import Text
@@ -195,7 +195,7 @@ processCommand model cmdString =
             { model | substitutions = [] } |> withCmd (put "reset: done")
 
         Just ":parse" ->
-            model |> withCmd (put (Debug.toString (Debug.log "INPUT" <| LambdaParser.parse (List.drop 1 args |> String.join " "))))
+            model |> withCmd (put (Debug.toString (Debug.log "INPUT" <| parse (List.drop 1 args |> String.join " "))))
 
         Just ":show" ->
             model |> withCmd (put (model.fileContents |> Maybe.withDefault "no file loaded" |> transformOutput model.viewStyle))
@@ -215,7 +215,7 @@ betaReduce model str =
 isNormal model str =
     let
         output =
-            case Result.map Lambda.isNormal (LambdaParser.parse str) of
+            case Result.map Lambda.isNormal (parse str) of
                 Ok True ->
                     "true"
 
@@ -288,7 +288,7 @@ getResidualCmd input =
 
 transform : String -> String
 transform str =
-    case str |> LambdaParser.parse |> Result.map (Lambda.beta >> Lambda.toString) of
+    case str |> parse |> Result.map (Lambda.beta >> Lambda.toString) of
         Ok output ->
             output
 

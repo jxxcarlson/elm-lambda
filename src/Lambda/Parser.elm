@@ -1,4 +1,4 @@
-module Lambda.LambdaParser exposing (..)
+module Lambda.Parser exposing (..)
 
 import Lambda.Lambda as Lambda exposing (Expr(..))
 import Parser.Advanced as PA exposing ((|.), (|=))

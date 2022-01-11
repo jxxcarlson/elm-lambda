@@ -1,4 +1,4 @@
-module Lambda exposing
+module Lambda.Lambda exposing
     ( Expr(..)
     , beta
     , boundVariables

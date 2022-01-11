@@ -2,10 +2,10 @@ port module Main exposing (main)
 
 import Blackbox
 import Cmd.Extra exposing (withCmd, withCmds, withNoCmd)
-import Defs
 import Json.Decode as D
 import Json.Encode as E
-import LambdaParser
+import Lambda.Defs as Defs
+import Lambda.LambdaParser as LambdaParser
 import List.Extra
 import Platform exposing (Program)
 
@@ -134,12 +134,20 @@ processCommand model cmdString =
             model |> withCmd (put Blackbox.helpText)
 
         Just ":let" ->
-            case List.drop 1 args |> listToPair of
-                Nothing ->
-                    model |> withCmd (put "Use exactly two arguments")
+            case args of
+                ":let" :: name :: rest ->
+                    if rest == [] then
+                        model |> withCmd (put "Missing argument: :let foo bar")
 
-                Just ( a, b ) ->
-                    { model | substitutions = ( a, b ) :: model.substitutions } |> withCmd (put <| "added " ++ a ++ " as " ++ transformOutput model.viewStyle b)
+                    else
+                        let
+                            data =
+                                String.join " " rest
+                        in
+                        { model | substitutions = ( name, data ) :: model.substitutions } |> withCmd (put <| "added " ++ name ++ " as " ++ transformOutput model.viewStyle data)
+
+                _ ->
+                    model |> withCmd (put "Bad args")
 
         Just ":raw" ->
             { model | viewStyle = Raw } |> withCmd (put "view style = raw")
@@ -154,7 +162,7 @@ processCommand model cmdString =
             { model | substitutions = [] } |> withCmd (put "reset: done")
 
         Just ":parse" ->
-            model |> withCmd (put (Debug.toString (LambdaParser.parse (List.drop 1 args |> String.join " "))))
+            model |> withCmd (put (Debug.toString (Debug.log "INPUT" <| LambdaParser.parse (List.drop 1 args |> String.join " "))))
 
         Just ":show" ->
             model |> withCmd (put (model.fileContents |> Maybe.withDefault "no file loaded" |> transformOutput model.viewStyle))

@@ -1,4 +1,4 @@
-module Problem exposing (..)
+module Tools.Problem exposing (..)
 
 
 type Problem

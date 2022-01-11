@@ -1,7 +1,7 @@
 module Blackbox exposing (helpText, transform)
 
-import Lambda
-import LambdaParser exposing (parse)
+import Lambda.Lambda as Lambda
+import Lambda.LambdaParser exposing (parse)
 
 
 transform : String -> String
@@ -36,11 +36,13 @@ Commands
 :let a b         # store b in the variable a
 :parse STR       # parse STR to Expr
 
+----------------------------------------------------
 Examples
 -------
 > :let first \\x.\\y.x
 > first
   \\x.\\y.x
+> :pretty
 > :let second \\x.\\y.y
 > (first)(second)
   \\y.\\x0.\\y0.y0

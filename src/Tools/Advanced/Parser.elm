@@ -1,4 +1,4 @@
-module ParserToolsAdvanced exposing
+module Tools.Advanced.Parser exposing
     ( first
     , foldWithInitialValue
     , many
@@ -14,7 +14,7 @@ module ParserToolsAdvanced exposing
     )
 
 import Parser.Advanced as PA exposing ((|.), (|=))
-import Problem exposing (Context(..), Problem(..))
+import Tools.Problem exposing (Context(..), Problem(..))
 
 
 type alias Parser a =

@@ -1,7 +1,7 @@
-module Defs exposing (..)
+module Lambda.Defs exposing (..)
 
 import Parser exposing ((|.), (|=), Parser)
-import ParserTools as PT
+import Tools.Parser as PT
 
 
 type alias Definition =

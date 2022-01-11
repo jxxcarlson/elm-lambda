@@ -1,3 +1,4 @@
 .idea/
 elm-stuff/
-main.js
+app/main.js
+app/src/main.js

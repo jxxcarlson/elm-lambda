@@ -1,4 +1,4 @@
-module ParserTools exposing
+module Tools.Parser exposing
     ( first
     , many
     , manyNonEmpty
@@ -13,7 +13,7 @@ module ParserTools exposing
     )
 
 import Parser exposing ((|.), (|=), Parser)
-import Problem exposing (Context(..), Problem(..))
+import Tools.Problem exposing (Context(..), Problem(..))
 
 
 word : Parser String

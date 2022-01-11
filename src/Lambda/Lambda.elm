@@ -46,7 +46,8 @@ toString expr =
             String.fromChar 'λ' ++ binder ++ "." ++ toString expr_
 
         Apply e1 e2 ->
-            toString e1 ++ " " ++ toString e2
+            -- toString e1 ++ " " ++ toString e2
+            toString e1 ++ "(" ++ toString e2 ++ ")"
 
 
 
@@ -181,19 +182,28 @@ substitute expr1 x expr2 =
 
 beta : Expr -> Expr
 beta expr =
+    if betaAux expr == expr then
+        expr
+
+    else
+        beta (betaAux expr)
+
+
+betaAux : Expr -> Expr
+betaAux expr =
     case expr of
         Apply (Lambda x e1) e2 ->
             let
                 e2Fresh =
                     freshenVariables e2 e1
             in
-            beta (substitute e2Fresh x e1)
+            substitute e2Fresh x e1
 
         Lambda x e ->
             Lambda x (beta e)
 
         Apply e f ->
-            beta (Apply (beta e) (beta f))
+            Apply (beta e) (beta f)
 
         _ ->
             expr

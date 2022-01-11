@@ -111,7 +111,22 @@ transformOutput viewStyle str =
             str
 
         Pretty ->
-            String.replace "\\" (String.fromChar 'λ') str
+            prettify str
+
+
+prettify : String -> String
+prettify str =
+    String.replace "\\" (String.fromChar 'λ') str
+
+
+prettifyPair : ( String, String ) -> String
+prettifyPair ( a, b ) =
+    "(" ++ a ++ ", " ++ prettify b ++ ")"
+
+
+prettifyPairList : List ( String, String ) -> String
+prettifyPairList pairs =
+    List.foldl (\p acc -> acc ++ prettifyPair p ++ "\n") "" pairs
 
 
 processCommand : Model -> String -> ( Model, Cmd Msg )
@@ -121,6 +136,7 @@ processCommand model cmdString =
             String.split " " cmdString
                 |> List.map String.trim
                 |> List.filter (\item -> item /= "")
+                |> Debug.log "ARGS"
 
         cmd =
             List.head args
@@ -141,8 +157,11 @@ processCommand model cmdString =
 
                     else
                         let
+                            _ =
+                                Debug.log "NAME" name
+
                             data =
-                                String.join " " rest
+                                String.join " " rest |> String.trimRight |> Debug.log "DATA"
                         in
                         { model | substitutions = ( name, data ) :: model.substitutions } |> withCmd (put <| "added " ++ name ++ " as " ++ transformOutput model.viewStyle data)
 
@@ -166,6 +185,9 @@ processCommand model cmdString =
 
         Just ":show" ->
             model |> withCmd (put (model.fileContents |> Maybe.withDefault "no file loaded" |> transformOutput model.viewStyle))
+
+        Just ":defs" ->
+            model |> withCmd (put (prettifyPairList model.substitutions))
 
         Just ":calc" ->
             -- Apply Blackbox.transform with residual arguments to the contents of memory
@@ -191,12 +213,16 @@ processCommand model cmdString =
 
         _ ->
             -- return default output
-            model |> withCmd (put <| transformOutput model.viewStyle <| Blackbox.transform (removeComments (applySubstitutions model.substitutions cmdString)))
+            model |> withCmd (put <| transformOutput model.viewStyle <| Blackbox.transform (applySubstitutions model.substitutions (Debug.log "CMD STRING" cmdString)))
+
+
+
+-- model |> withCmd (put <| transformOutput model.viewStyle <| Blackbox.transform (removeComments cmdString))
 
 
 applySubstitutions : List ( String, String ) -> String -> String
 applySubstitutions substitutions str =
-    List.foldl (\( a, b ) s -> String.replace a b s) str substitutions
+    List.foldl (\( a, b ) s -> String.replace a b s) (Debug.log "STR" str) (Debug.log "SUBST LIST" substitutions) |> Debug.log "SUBS"
 
 
 

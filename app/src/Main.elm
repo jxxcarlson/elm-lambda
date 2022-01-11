@@ -1,6 +1,5 @@
 port module Main exposing (main)
 
-import Blackbox
 import Cmd.Extra exposing (withCmd, withCmds, withNoCmd)
 import Json.Decode as D
 import Json.Encode as E
@@ -9,6 +8,7 @@ import Lambda.Lambda as Lambda
 import Lambda.LambdaParser as LambdaParser
 import List.Extra
 import Platform exposing (Program)
+import Text
 
 
 port get : (String -> msg) -> Sub msg
@@ -147,10 +147,10 @@ processCommand model cmdString =
     in
     case cmd of
         Just ":help" ->
-            model |> withCmd (put Blackbox.helpText)
+            model |> withCmd (put Text.help)
 
         Just ":examples" ->
-            model |> withCmd (put Blackbox.examplesText)
+            model |> withCmd (put Text.examples)
 
         Just ":normal" ->
             case args of
@@ -209,7 +209,7 @@ processCommand model cmdString =
 
 
 betaReduce model str =
-    model |> withCmd (put <| transformOutput model.viewStyle <| Blackbox.transform (applySubstitutions model.substitutions str))
+    model |> withCmd (put <| transformOutput model.viewStyle <| transform (applySubstitutions model.substitutions str))
 
 
 isNormal model str =
@@ -284,6 +284,16 @@ getResidualCmd input =
 
 
 -- FILE/CONTENT OPERATIONS
+
+
+transform : String -> String
+transform str =
+    case str |> LambdaParser.parse |> Result.map (Lambda.beta >> Lambda.toString) of
+        Ok output ->
+            output
+
+        Err _ ->
+            "Error"
 
 
 removeComments : String -> String

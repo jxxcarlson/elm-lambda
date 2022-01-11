@@ -1,21 +1,8 @@
-module Blackbox exposing (examplesText, helpText, transform)
-
-import Lambda.Lambda as Lambda
-import Lambda.LambdaParser exposing (parse)
+module Text exposing (examples, help)
 
 
-transform : String -> String
-transform str =
-    case str |> parse |> Result.map (Lambda.beta >> Lambda.toString) of
-        Ok output ->
-            output
-
-        Err _ ->
-            "Error"
-
-
-helpText : String
-helpText =
+help : String
+help =
     """----------------------------------------------------
 Beta reduce lambda expressions
 
@@ -51,7 +38,8 @@ reduces to λy.λu.u.
 """
 
 
-examplesText =
+examples : String
+examples =
     """
 Examples
 -------

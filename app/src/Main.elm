@@ -161,7 +161,7 @@ processCommand model cmdString =
                     isNormal model (String.join " " rest)
 
                 _ ->
-                    model |> withCmd (put "Error")
+                    model |> withCmd (put "Error computing normal")
 
         Just ":let" ->
             case args of
@@ -223,7 +223,7 @@ isNormal model str =
                     "false"
 
                 Err _ ->
-                    "Error"
+                    "Error (normal)"
     in
     model |> withCmd (put <| output)
 
@@ -293,7 +293,7 @@ transform str =
             output
 
         Err _ ->
-            "Error"
+            "Error (parse)"
 
 
 removeComments : String -> String

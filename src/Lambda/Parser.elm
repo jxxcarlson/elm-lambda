@@ -1,6 +1,6 @@
 module Lambda.Parser exposing (..)
 
-import Lambda.Lambda as Lambda exposing (Expr(..))
+import Lambda.Expression as Lambda exposing (Expr(..))
 import Parser.Advanced as PA exposing ((|.), (|=))
 import Set exposing (Set)
 import Tools.Advanced.Parser as PT

@@ -1,7 +1,7 @@
-module Eval exposing (Env, Value(..), env1, eval)
+module Lambda.Eval exposing (Env, Value(..), env1, eval)
 
 import Dict exposing (Dict)
-import Lambda.Lambda exposing (Expr(..))
+import Lambda.Expression exposing (Expr(..))
 
 
 type Value

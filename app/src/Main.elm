@@ -4,7 +4,7 @@ import Cmd.Extra exposing (withCmd, withCmds, withNoCmd)
 import Json.Decode as D
 import Json.Encode as E
 import Lambda.Defs as Defs
-import Lambda.Lambda as Lambda
+import Lambda.Expression as Lambda
 import Lambda.Parser exposing (parse)
 import List.Extra
 import Platform exposing (Program)

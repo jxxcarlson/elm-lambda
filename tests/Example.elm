@@ -1,9 +1,9 @@
 module Example exposing (..)
 
 import Dict
-import Eval exposing (Env, Value(..), eval)
 import Expect exposing (Expectation)
-import Lambda exposing (Expr(..), beta)
+import Lambda.Eval exposing (Env, Value(..), eval)
+import Lambda.Expression exposing (Expr(..), beta)
 import Library exposing (id_)
 import Test exposing (..)
 
@@ -15,7 +15,7 @@ suite =
             [ test "eval variable, empty environment" <|
                 \_ ->
                     eval (Var "x") Dict.empty
-                        |> Expect.equal (Eval.Err "Variable not defined")
+                        |> Expect.equal (Lambda.Eval.Err "Variable not defined")
             , test "eval variable, x = 17 in environment" <|
                 \_ ->
                     eval (Var "x") (Dict.singleton "x" (Int 17))

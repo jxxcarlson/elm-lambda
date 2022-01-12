@@ -1,8 +1,8 @@
 module Library exposing (..)
 
 import Dict
-import Eval exposing (..)
-import Lambda exposing (..)
+import Lambda.Eval exposing (..)
+import Lambda.Expression exposing (..)
 
 
 stdEnv =

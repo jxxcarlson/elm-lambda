@@ -74,27 +74,20 @@ eval meta =
             Just <| Lambda.beta expr
 
         MetaApply metas ->
-            List.map eval metas |> Maybe.Extra.values |> applyList |> Maybe.map Lambda.beta
+            List.map eval metas
+                |> Maybe.Extra.values
+                |> Lambda.apply
+                |> Lambda.beta
+                |> Just
 
         MetaAbstract binder metas ->
-            case applyList (List.map eval metas |> Maybe.Extra.values) of
-                Nothing ->
-                    Nothing
-
-                Just expr ->
-                    Just <| Lambda.Lambda binder (Lambda.beta expr)
+            let
+                expr =
+                    Lambda.apply (List.map eval metas |> Maybe.Extra.values)
+            in
+            Just <| Lambda.Lambda binder (Lambda.beta expr)
 
         MetaErr _ ->
-            Nothing
-
-
-applyList : List Lambda.Expr -> Maybe Lambda.Expr
-applyList exprs =
-    case exprs of
-        a :: b :: rest ->
-            Just (loop { acc = Lambda.Apply a b, terms = rest } nextStep)
-
-        _ ->
             Nothing
 
 

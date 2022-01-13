@@ -20,11 +20,11 @@ STR              # beta reduce STR
 :normal STR      # is STR in normal form?
 
 :examples        # display examples
-:load defs.txt   # load definitions file
+:load default_defs.txt   # load definitions file
 
-:reset           # reset definitions
-:show            # display file contents
-:defs            # display current definitions
+:reset           # reset environment
+:show            # display environment file
+:env             # display current environment
 :raw             # set app for raw output, e.g., \\x.x
 :pretty          # set app for pretty output, e.g., λx.x
 

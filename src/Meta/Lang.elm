@@ -17,10 +17,26 @@ eval env str =
             "Parse error"
 
         Ok strs ->
-            List.map (lookup env) strs
-                |> Meta.Expression.apply
-                |> Maybe.map Lambda.Expression.toString
-                |> Maybe.withDefault "error"
+            strs
+                |> List.map String.trim
+                |> List.map (lookup env)
+                |> List.map (expand env)
+                |> apply
+                |> Lambda.Expression.beta
+                |> Lambda.Expression.toString
+
+
+apply : List Lambda.Expression.Expr -> Lambda.Expression.Expr
+apply exprs =
+    case exprs of
+        [] ->
+            Lambda.Expression.Var "ERROR (3)"
+
+        expr :: [] ->
+            Lambda.Expression.beta expr
+
+        _ ->
+            Lambda.Expression.beta (Lambda.Expression.apply exprs)
 
 
 parse : String -> Result (List (PA.DeadEnd Context Problem)) (List String)
@@ -28,19 +44,42 @@ parse str =
     PA.run (PT.many itemParser) str
 
 
-lookup : Meta.Expression.Environment -> String -> Meta.Expression.Meta
+lookup : Meta.Expression.Environment -> String -> Lambda.Expression.Expr
 lookup env str =
     case Dict.get str env of
         Just meta ->
-            meta
+            case Meta.Expression.eval meta of
+                Just expr ->
+                    expr
+
+                Nothing ->
+                    Lambda.Expression.Var "ERROR (1)"
 
         Nothing ->
             case Lambda.Parser.parse str of
                 Ok expr ->
-                    L expr
+                    expr
 
                 Err _ ->
-                    MetaErr "Parse error"
+                    Lambda.Expression.Var "ERROR (2)"
+
+
+expand a b =
+    b
+
+
+
+--
+--expand : Meta.Expression.Environment -> Lambda.Expression.Expr -> Lambda.Expression.Expr
+--expand env expr =
+--    case expr of
+--        Lambda.Expression.Var str ->
+--            case Dict.get str env of
+--                Nothing ->
+--                    expr
+--
+--                Just (Var ) ->
+--                    Lambda.Expression.Var val
 
 
 itemParser =

@@ -1,5 +1,6 @@
 module Lambda.Expression exposing
     ( Expr(..)
+    , apply
     , beta
     , boundVariables
     , freeVariables
@@ -48,6 +49,22 @@ toString expr =
         Apply e1 e2 ->
             -- toString e1 ++ " " ++ toString e2
             toString e1 ++ "(" ++ toString e2 ++ ")"
+
+
+apply : List Expr -> Expr
+apply exprs =
+    case exprs of
+        [] ->
+            Var "ERROR: List cannot be empty"
+
+        expr :: [] ->
+            expr
+
+        a :: b :: [] ->
+            Apply a b
+
+        a :: b :: rest ->
+            apply (Apply a b :: rest)
 
 
 

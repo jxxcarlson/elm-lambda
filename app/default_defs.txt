@@ -1,0 +1,21 @@
+id        \x.x
+
+# Booleans
+true      \x.\y.x
+false     \x.\y.y
+and       \p.\q.p q p
+or        \p.\q.p p q
+not       \p.p (false) true
+
+# Church numerals
+zero      \s.\z.z
+one       \s.\z.s z
+two       \s.\z.s s z
+three     \s.\z.s s s z
+isZero    \n.n (\x.zero) true
+
+# Tests
+test0     (isZero) zero
+test1     (isZero) one
+test2     (isZero) two
+test3     (isZero) three

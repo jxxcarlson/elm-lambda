@@ -1,12 +1,15 @@
 port module Main exposing (main)
 
 import Cmd.Extra exposing (withCmd, withCmds, withNoCmd)
+import Dict
 import Json.Decode as D
 import Json.Encode as E
 import Lambda.Defs as Defs
 import Lambda.Expression as Lambda
 import Lambda.Parser exposing (parse)
 import List.Extra
+import Meta.Expression
+import Meta.Lang
 import Platform exposing (Program)
 import Text
 
@@ -35,7 +38,8 @@ main =
 type alias Model =
     { residualCommand : String
     , fileContents : Maybe String
-    , substitutions : List ( String, String )
+    , definitions : List ( String, String )
+    , environment : Meta.Expression.Environment
     , viewStyle : ViewStyle
     }
 
@@ -58,10 +62,11 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     { residualCommand = ""
     , fileContents = Nothing
-    , substitutions = []
+    , environment = Dict.empty
+    , definitions = []
     , viewStyle = Pretty
     }
-        |> withNoCmd
+        |> withCmd (loadFileCmd "default_defs.txt")
 
 
 subscriptions : Model -> Sub Msg
@@ -98,11 +103,22 @@ update msg model =
                                 False ->
                                     ":" ++ model.residualCommand ++ " " ++ removeComments data_
 
-                        substitutions =
-                            Defs.install data []
+                        definitions_ =
+                            Defs.install (Defs.removeComments data) []
+
+                        definitions =
+                            Defs.expand definitions_ |> Defs.expand
+
+                        environment =
+                            Meta.Expression.load definitions
                     in
                     -- { model | fileContents = Just data } |> withCmd (put <| "Data read: " ++ String.fromInt (String.length input))
-                    { model | fileContents = Just data_, substitutions = substitutions } |> withCmd (put <| transformOutput model.viewStyle <| data)
+                    { model
+                        | fileContents = Just data_
+                        , definitions = definitions
+                        , environment = environment
+                    }
+                        |> withCmd (put <| transformOutput model.viewStyle <| data)
 
 
 transformOutput : ViewStyle -> String -> String
@@ -165,19 +181,16 @@ processCommand model cmdString =
 
         Just ":let" ->
             case args of
-                ":let" :: name :: rest ->
+                ":let" :: name :: "=" :: rest ->
                     if rest == [] then
-                        model |> withCmd (put "Missing argument: :let foo bar")
+                        model |> withCmd (put "Missing argument: :let foo = BAR")
 
                     else
                         let
-                            _ =
-                                Debug.log "NAME" name
-
                             data =
-                                String.join " " rest |> String.trimRight |> Debug.log "DATA"
+                                String.join " " rest |> String.trimRight
                         in
-                        { model | substitutions = ( name, data ) :: model.substitutions } |> withCmd (put <| "added " ++ name ++ " as " ++ transformOutput model.viewStyle data)
+                        { model | environment = Meta.Expression.addVar name data model.environment } |> withCmd (put <| "added " ++ name ++ " as " ++ transformOutput model.viewStyle data)
 
                 _ ->
                     model |> withCmd (put "Bad args")
@@ -192,20 +205,20 @@ processCommand model cmdString =
             loadFile model arg
 
         Just ":reset" ->
-            { model | substitutions = [] } |> withCmd (put "reset: done")
+            { model | environment = Dict.empty } |> withCmd (put "reset: done")
 
         Just ":parse" ->
-            model |> withCmd (put (Debug.toString (Debug.log "INPUT" <| parse (List.drop 1 args |> String.join " "))))
+            model |> withCmd (put (Debug.toString (parse (List.drop 1 args |> String.join " "))))
 
         Just ":show" ->
-            model |> withCmd (put (model.fileContents |> Maybe.withDefault "no file loaded" |> transformOutput model.viewStyle))
+            model |> withCmd (put (model.fileContents |> Maybe.withDefault "no environment defined" |> transformOutput model.viewStyle))
 
-        Just ":defs" ->
-            model |> withCmd (put (prettifyPairList model.substitutions))
+        Just ":env" ->
+            model |> withCmd (put (Meta.Expression.showEnvironment model.environment))
 
         _ ->
             -- return default output
-            betaReduce model cmdString
+            model |> withCmd (put (Meta.Lang.eval model.environment cmdString))
 
 
 betaReduce model str =

@@ -2,9 +2,12 @@ module Meta.Expression exposing
     ( Environment
     , Meta(..)
     , addVar
+    , apply
     , define
     , eval
+    , load
     , showEnvironment
+    , testEnvironment
     )
 
 import Dict exposing (Dict)
@@ -42,6 +45,11 @@ showMeta meta =
 
         MetaErr str ->
             "Error: " ++ str
+
+
+apply : List Meta -> Maybe Lambda.Expr
+apply metas =
+    eval <| MetaApply metas
 
 
 {-|
@@ -142,3 +150,19 @@ define name str =
 
         Err _ ->
             MetaErr ("Could not parse: " ++ str)
+
+
+load : List ( String, String ) -> Environment
+load defs =
+    List.foldl (\( name, definition ) acc -> addVar name definition acc) Dict.empty defs
+
+
+testEnvironment =
+    load
+        [ ( "id", "\\x.x" )
+        , ( "true", "\\x.\\y.x" )
+        , ( "false", "\\x.\\y.y" )
+        , ( "zero", "\\s.\\z.z" )
+        , ( "one", "\\s.\\z.s z" )
+        , ( "two", "\\s.\\z.s s z" )
+        ]

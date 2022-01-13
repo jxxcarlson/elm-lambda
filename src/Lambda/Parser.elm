@@ -56,24 +56,12 @@ applicationParser aInitial =
 exprParser1 =
     PT.first
         (PA.oneOf
-            [ parenthesized (PA.lazy (\_ -> exprParser1))
+            [ PT.parenthesized (PA.lazy (\_ -> exprParser1))
             , PA.lazy (\_ -> abstractionParser)
             , variableParser
             ]
         )
         PA.spaces
-
-
-leftParen =
-    PA.symbol (PA.Token "(" ExpectingLParen)
-
-
-rightParen =
-    PA.symbol (PA.Token ")" ExpectingRParen)
-
-
-parenthesized p =
-    PT.middle leftParen p rightParen
 
 
 applicationParser1 : PA.Parser Context Problem Expr

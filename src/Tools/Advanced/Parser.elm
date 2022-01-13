@@ -6,6 +6,7 @@ module Tools.Advanced.Parser exposing
     , manySeparatedBy
     , middle
     , optional
+    , parenthesized
     , second
     , sequence
     , string
@@ -231,6 +232,18 @@ update f a state =
 
         Just b ->
             { state | acc = Just (f a b) }
+
+
+leftParen =
+    PA.symbol (PA.Token "(" ExpectingLParen)
+
+
+rightParen =
+    PA.symbol (PA.Token ")" ExpectingRParen)
+
+
+parenthesized p =
+    middle leftParen p rightParen
 
 
 

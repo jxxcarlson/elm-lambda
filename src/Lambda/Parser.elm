@@ -1,4 +1,17 @@
-module Lambda.Parser exposing (Parser, abstractionParser, applicationParser, applicationParser1, exprParser, exprParser1, id, parse, rawVariableParser, text, unsafeParse, variableParser)
+module Lambda.Parser exposing
+    ( Parser
+    , abstractionParser
+    , applicationParser
+    , applicationParser1
+    , exprParser
+    , exprParser1
+    , id
+    , parse
+    , rawVariableParser
+    , text
+    , unsafeParse
+    , variableParser
+    )
 
 import Lambda.Expression exposing (Expr(..))
 import Parser.Advanced as PA exposing ((|.), (|=))

@@ -1,7 +1,7 @@
-module ParserTest exposing (..)
+module ParserTest exposing (suite)
 
-import Expect exposing (Expectation)
-import Lambda.Expression exposing (Expr(..), beta)
+import Expect
+import Lambda.Expression exposing (Expr(..))
 import Lambda.Parser exposing (..)
 import Parser.Advanced exposing (run)
 import Test exposing (..)

@@ -1,5 +1,6 @@
 module Tools.Parser exposing
     ( first
+    , fold
     , many
     , manyNonEmpty
     , manySeparatedBy

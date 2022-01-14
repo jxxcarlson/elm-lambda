@@ -91,35 +91,6 @@ eval meta =
             Nothing
 
 
-type Step state a
-    = Loop state
-    | Done a
-
-
-loop : state -> (state -> Step state a) -> a
-loop s f =
-    case f s of
-        Loop s_ ->
-            loop s_ f
-
-        Done b ->
-            b
-
-
-type alias State =
-    { acc : Lambda.Expr, terms : List Lambda.Expr }
-
-
-nextStep : State -> Step State Lambda.Expr
-nextStep { acc, terms } =
-    case List.head terms of
-        Nothing ->
-            Done acc
-
-        Just term ->
-            Loop { acc = Lambda.Apply term acc, terms = List.drop 1 terms }
-
-
 showEnvironment : Environment -> String
 showEnvironment env =
     env |> Dict.values |> List.map showMeta |> String.join "\n"
@@ -128,7 +99,7 @@ showEnvironment env =
 addVar : String -> String -> Environment -> Environment
 addVar name str env =
     case define name str of
-        (V name_ expr_) as expr ->
+        (V _ _) as expr ->
             Dict.insert name expr env
 
         _ ->

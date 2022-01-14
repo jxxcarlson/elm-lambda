@@ -1,4 +1,4 @@
-module Library exposing (..)
+module Library exposing (a, ex1, ex2, false, id, id_, isZero, k, one, stdEnv, true, two, zero)
 
 import Dict
 import Lambda.Eval exposing (..)

@@ -1,8 +1,8 @@
-module Example exposing (..)
+module Example exposing (suite)
 
 import Dict
-import Expect exposing (Expectation)
-import Lambda.Eval exposing (Env, Value(..), eval)
+import Expect
+import Lambda.Eval exposing (Value(..), eval)
 import Lambda.Expression exposing (Expr(..), beta)
 import Library exposing (id_)
 import Test exposing (..)

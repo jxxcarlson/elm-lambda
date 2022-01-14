@@ -1,4 +1,4 @@
-module Lambda.Defs exposing (..)
+module Lambda.Defs exposing (Definition, addTerm, definitionParser, expand, expand1, expandAux, install, installOne, lambda, parse, removeComments, resolve, unresolved_)
 
 import Dict exposing (Dict)
 import Maybe.Extra

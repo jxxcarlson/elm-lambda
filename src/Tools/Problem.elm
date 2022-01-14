@@ -1,4 +1,4 @@
-module Tools.Problem exposing (..)
+module Tools.Problem exposing (Context(..), Problem(..))
 
 
 type Problem

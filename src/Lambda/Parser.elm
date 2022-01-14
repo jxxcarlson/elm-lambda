@@ -1,10 +1,10 @@
-module Lambda.Parser exposing (..)
+module Lambda.Parser exposing (Parser, abstractionParser, applicationParser, applicationParser1, exprParser, exprParser1, id, parse, rawVariableParser, text, unsafeParse, variableParser)
 
-import Lambda.Expression as Lambda exposing (Expr(..))
+import Lambda.Expression exposing (Expr(..))
 import Parser.Advanced as PA exposing ((|.), (|=))
-import Set exposing (Set)
+import Set
 import Tools.Advanced.Parser as PT
-import Tools.Problem as Problem exposing (Context, Problem(..))
+import Tools.Problem exposing (Context, Problem(..))
 
 
 type alias Parser a =

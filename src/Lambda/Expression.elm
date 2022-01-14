@@ -124,15 +124,6 @@ freshenVariablesAux avoid expr =
             freshenVariablesAux (List.drop 1 avoid) newExpr
 
 
-freshenVariable : String -> Expr -> Expr -> Expr
-freshenVariable x expr1 expr2 =
-    let
-        xx =
-            fresh x (variables expr2 |> Set.toList)
-    in
-    renameVariable x xx expr1
-
-
 renameVariable : String -> String -> Expr -> Expr
 renameVariable a b expr =
     case expr of

@@ -3,7 +3,7 @@ module Meta.Lang exposing (eval, lookup, parse)
 import Dict
 import Lambda.Expression
 import Lambda.Parser
-import Meta.Expression exposing (Meta(..))
+import Meta.Expression
 import Parser.Advanced as PA
 import Set
 import Tools.Advanced.Parser as PT

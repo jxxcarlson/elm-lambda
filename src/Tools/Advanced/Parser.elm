@@ -185,12 +185,6 @@ type alias FoldState a =
     { init : a, acc : Maybe a }
 
 
-
---fold : (a -> a -> a) -> LambdaParser a -> LambdaParser (Maybe a)
---fold f p =
---    PA.loop { init = Nothing, acc = Nothing } (foldAux f p)
-
-
 foldWithInitialValue : (a -> a -> a) -> Parser a -> a -> Parser a
 foldWithInitialValue f p a =
     PA.loop { init = a, acc = Nothing } (foldAux f p)
@@ -214,16 +208,6 @@ foldAux f p state =
         ]
 
 
-
---foldAux : (a -> a -> a) -> LambdaParser a -> FoldState a -> LambdaParser (PA.Step (FoldState a) (Maybe a))
---foldAux f p state =
---    PA.oneOf
---        [ PA.succeed (\a -> PA.Loop (update f a state))
---            |= p
---        , PA.succeed () |> PA.map (\_ -> PA.Done state.acc)
---        ]
-
-
 update : (a -> a -> a) -> a -> FoldState a -> FoldState a
 update f a state =
     case state.acc of
@@ -244,23 +228,3 @@ rightParen =
 
 parenthesized p =
     middle leftParen p rightParen
-
-
-
---
----- LOOP
---
---
---type Step state a
---    = Loop state
---    | Done a
---
---
---loop : state -> (state -> Step state a) -> a
---loop s nextState =
---    case nextState s of
---        Loop s_ ->
---            loop s_ nextState
---
---        Done b ->
---            b

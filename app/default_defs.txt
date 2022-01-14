@@ -1,4 +1,9 @@
 id        \x.x
+pair      \x.\y.\f.f x y
+first     \p.p(\x.\y.x)
+second    \p.p(\x.\y.y)
+ab         pair a b
+ab'       \f.f a b
 
 # Booleans
 true      \x.\y.x
@@ -9,13 +14,40 @@ not       \p.p (false) true
 
 # Church numerals
 zero      \s.\z.z
-one       \s.\z.s z
+one       \s.\z.s z 
 two       \s.\z.s s z
 three     \s.\z.s s s z
 isZero    \n.n (\x.zero) true
+succ      \n.\f.\x.f(n f x)
 
 # Tests
 test0     (isZero) zero
 test1     (isZero) one
 test2     (isZero) two
 test3     (isZero) three
+
+
+# three two        blows the stack
+# (three) (two)    parse error
+# (three)two       parse error
+
+# > \n.\f.\x.f(n f x)
+#  ERROR (2)(f)(x) (parse error)
+
+# pair a b -> λf.f a b
+# BUT INSTEAD pair a b ->
+
+
+# > ab'
+# λf.f(a)(b)
+# > first ab'
+# a
+
+# > ab'
+# λf.f(a)(b)
+
+# > first λf.f(a)(b)          <=== there must be a parse error
+# λp.p(λx.λy.x)
+
+# > first \f.f(a)(b)
+# a

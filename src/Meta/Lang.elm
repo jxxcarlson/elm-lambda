@@ -23,6 +23,7 @@ eval env str =
                 |> List.map (expand env)
                 |> apply
                 |> Lambda.Expression.beta
+                |> Lambda.Expression.reduceSubscripts
                 |> Lambda.Expression.toString
 
 
@@ -70,16 +71,16 @@ expand a b =
 
 
 --
---expand : Meta.Expression.Environment -> Lambda.Expression.Expr -> Lambda.Expression.Expr
+--expand : MetaTest.Expression.Environment -> LambdaTest.Expression.Expr -> LambdaTest.Expression.Expr
 --expand env expr =
 --    case expr of
---        Lambda.Expression.Var str ->
+--        LambdaTest.Expression.Var str ->
 --            case Dict.get str env of
 --                Nothing ->
 --                    expr
 --
 --                Just (Var ) ->
---                    Lambda.Expression.Var val
+--                    LambdaTest.Expression.Var val
 
 
 itemParser =

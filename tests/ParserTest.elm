@@ -9,7 +9,7 @@ import Test exposing (..)
 
 suite : Test
 suite =
-    describe "Lambda LambdaParser"
+    describe "LambdaTest LambdaParser"
         [ describe "parser"
             [ test "parse variable" <|
                 \_ ->

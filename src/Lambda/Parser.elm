@@ -47,10 +47,10 @@ id =
 {-|
 
     > run exprParser "\\x.x(\\y.y)(\\z.z)"
-    Ok (Apply (Apply (Lambda "x" (Var "x")) (Lambda "y" (Var "y"))) (Lambda "z" (Var "z")))
+    Ok (Apply (Apply (LambdaTest "x" (Var "x")) (LambdaTest "y" (Var "y"))) (LambdaTest "z" (Var "z")))
 
     > run exprParser "\\x.x(\\y.y)(\\z.z)" |> Result.map beta
-    Ok (Lambda "z" (Var "z"))
+    Ok (LambdaTest "z" (Var "z"))
 
 -}
 exprParser : PA.Parser Context Problem Expr

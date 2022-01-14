@@ -6,11 +6,13 @@ module Meta.Expression exposing
     , define
     , eval
     , load
+    , setupEnviroment
     , showEnvironment
     , testEnvironment
     )
 
 import Dict exposing (Dict)
+import Lambda.Defs
 import Lambda.Expression as Lambda
 import Lambda.Parser
 import Maybe.Extra
@@ -55,13 +57,13 @@ apply metas =
 {-|
 
     > idv = define "id" "\\x.x"
-    V "id" (Lambda "x" (Var "x"))
+    V "id" (LambdaTest "x" (Var "x"))
 
     > eval (MetaApply [idv, idv])
-    Just (Lambda "x0" (Var "x0"))
+    Just (LambdaTest "x0" (Var "x0"))
 
     > eval (MetaApply [idv, idv, idv])
-    Just (Lambda "x00" (Var "x00"))
+    Just (LambdaTest "x00" (Var "x00"))
 
 -}
 eval : Meta -> Maybe Lambda.Expr
@@ -119,6 +121,18 @@ define name str =
 load : List ( String, String ) -> Environment
 load defs =
     List.foldl (\( name, definition ) acc -> addVar name definition acc) Dict.empty defs
+
+
+setupEnviroment : String -> Environment
+setupEnviroment data =
+    let
+        rawDefinitions =
+            Lambda.Defs.install (Lambda.Defs.removeComments data) []
+
+        definitions =
+            Lambda.Defs.expand rawDefinitions |> Lambda.Defs.expand
+    in
+    load definitions
 
 
 testEnvironment =

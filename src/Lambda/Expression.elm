@@ -6,6 +6,7 @@ module Lambda.Expression exposing
     , freeVariables
     , freshenVariables
     , isNormal
+    , reduceSubscripts
     , renameVariable
     , substitute
     , toRawString
@@ -220,3 +221,32 @@ betaAux expr =
 isNormal : Expr -> Bool
 isNormal expr =
     beta expr == expr
+
+
+numericEnding : String -> Maybe Int
+numericEnding str =
+    String.right 1 str |> String.toInt
+
+
+numerals =
+    String.split "" "0123456789"
+
+
+hasNumericEnding : String -> Bool
+hasNumericEnding str =
+    List.member (String.right 1 str) numerals
+
+
+reduceSubscripts : Expr -> Expr
+reduceSubscripts expr =
+    let
+        vars =
+            variables expr |> Set.toList
+
+        varsWithNumericEndings =
+            List.filter (\s -> hasNumericEnding s) vars
+
+        reducibleVariables =
+            List.filter (\s -> not (List.member (String.dropRight 1 s) vars)) varsWithNumericEndings
+    in
+    List.foldl (\var acc -> renameVariable var (String.dropRight 1 var) acc) expr reducibleVariables

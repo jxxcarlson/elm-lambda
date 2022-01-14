@@ -56,7 +56,7 @@ Examples
   \\y.y
 
 > :parse \\s.\\z.s s z
-Ok (Lambda "s" (Lambda "z" (Apply (Apply (Var "s") (Var "s")) (Var "z"))))
+Ok (LambdaTest "s" (LambdaTest "z" (Apply (Apply (Var "s") (Var "s")) (Var "z"))))
 
 > :normal  λx.λy.x λu.u
 true

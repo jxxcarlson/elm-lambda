@@ -2,12 +2,10 @@ module Lambda.Parser exposing
     ( Parser
     , abstractionParser
     , applicationParser
-    , applicationParser1
     , exprParser
-    , exprParser1
-    , id
     , parse
     , rawVariableParser
+    , simpleExprParser
     , text
     , unsafeParse
     , variableParser
@@ -36,12 +34,7 @@ unsafeParse str =
             expr
 
         Err _ ->
-            id
-
-
-id : Expr
-id =
-    Lambda "x" (Var "x")
+            Var "PARSE ERROR"
 
 
 {-|
@@ -55,45 +48,37 @@ id =
 -}
 exprParser : PA.Parser Context Problem Expr
 exprParser =
-    exprParser1 |> PA.andThen applicationParser
+    PA.inContext Tools.Problem.Expression
+        (simpleExprParser |> PA.andThen applicationParser)
 
 
 applicationParser aInitial =
-    PT.foldWithInitialValue (\a b -> Apply b a) exprParser1 aInitial
+    PA.inContext Tools.Problem.Application
+        (PT.foldWithInitialValue (\a b -> Apply b a) simpleExprParser aInitial)
 
 
-
---  exprParser = PT.first exprParser1_ PA.spaces
-
-
-exprParser1 =
-    PT.first
-        (PA.oneOf
-            [ PT.parenthesized (PA.lazy (\_ -> exprParser1))
-            , PA.lazy (\_ -> abstractionParser)
-            , variableParser
-            ]
+simpleExprParser =
+    PA.inContext Tools.Problem.SimpleExpression
+        (PT.first
+            (PA.oneOf
+                [ PA.lazy (\_ -> PT.parenthesized exprParser)
+                , PA.lazy (\_ -> abstractionParser)
+                , variableParser
+                ]
+            )
+            PA.spaces
         )
-        PA.spaces
-
-
-applicationParser1 : PA.Parser Context Problem Expr
-applicationParser1 =
-    PA.succeed (\e1 e2 -> Apply e1 e2)
-        |= abstractionParser
-        |. PA.spaces
-        |= exprParser1
-        |. PA.spaces
 
 
 abstractionParser =
-    PA.succeed (\var expr -> Lambda var expr)
-        |. PA.oneOf [ PA.symbol (PA.Token (String.fromChar 'λ') ExpectingLambdaCharacter), PA.symbol (PA.Token "\\" ExpectingBackslash) ]
-        |= rawVariableParser
-        |. PA.symbol (PA.Token "." ExpectingPeriod)
-        -- |= exprParser1
-        |= PA.lazy (\_ -> exprParser)
-        |. PA.spaces
+    PA.inContext Tools.Problem.Abstraction <|
+        (PA.succeed (\var expr -> Lambda var expr)
+            |. PA.oneOf [ PA.symbol (PA.Token (String.fromChar 'λ') ExpectingLambdaCharacter), PA.symbol (PA.Token "\\" ExpectingBackslash) ]
+            |= rawVariableParser
+            |. PA.symbol (PA.Token "." ExpectingPeriod)
+            |= PA.lazy (\_ -> exprParser)
+            |. PA.spaces
+        )
 
 
 
@@ -107,7 +92,10 @@ abstractionParser =
 
 variableParser : PA.Parser Context Problem Expr
 variableParser =
-    PA.variable { start = Char.isAlpha, inner = Char.isAlpha, reserved = Set.empty, expecting = ExpectingVar } |> PA.map Var
+    PA.inContext Tools.Problem.Variable <|
+        (PA.variable { start = Char.isAlpha, inner = Char.isAlpha, reserved = Set.empty, expecting = ExpectingVar }
+            |> PA.map Var
+        )
 
 
 rawVariableParser : PA.Parser Context Problem String

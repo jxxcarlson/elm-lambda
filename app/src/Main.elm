@@ -105,13 +105,7 @@ update msg model =
                                 False ->
                                     ":" ++ model.residualCommand ++ " " ++ removeComments data_
 
-                        --definitions_ =
-                        --    Defs.install (Defs.removeComments data) []
-                        --
-                        --definitions =
-                        --    Defs.expand definitions_ |> Defs.expand
                         environment =
-                            -- Meta.Expression.load definitions
                             Meta.Expression.setupEnviroment data
                     in
                     -- { model | fileContents = Just data } |> withCmd (put <| "Data read: " ++ String.fromInt (String.length input))
@@ -208,7 +202,7 @@ processCommand model cmdString =
             loadFile model arg
 
         Just ":reset" ->
-            { model | environment = Dict.empty } |> withCmd (put "reset: done")
+            { model | environment = Dict.empty, fileContents = Nothing } |> withCmd (put "reset: done")
 
         Just ":parse" ->
             model |> withCmd (put (Debug.toString (parse (List.drop 1 args |> String.join " "))))

@@ -14,7 +14,7 @@ not       \p.p (false) true
 
 # Church numerals
 zero      \s.\z.z
-one       \s.\z.s z 
+one       \s.\z.s z
 two       \s.\z.s s z
 three     \s.\z.s s s z
 isZero    \n.n (\x.zero) true
@@ -27,11 +27,15 @@ test2     (isZero) two
 test3     (isZero) three
 
 
+# > first (pair a b)
+# Parse error
+
+
 # three two        blows the stack
 # (three) (two)    parse error
 # (three)two       parse error
 
-# > \n.\f.\x.f(n f x)
+# > (\n.\f.\x.f(n f x))
 #  ERROR (2)(f)(x) (parse error)
 
 # pair a b -> λf.f a b

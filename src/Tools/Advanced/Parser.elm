@@ -227,4 +227,5 @@ rightParen =
 
 
 parenthesized p =
-    middle leftParen p rightParen
+    PA.inContext Tools.Problem.Parenthesized
+        (middle leftParen p rightParen)

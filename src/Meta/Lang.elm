@@ -13,17 +13,17 @@ import Tools.Problem exposing (Context, Problem(..))
 eval : Meta.Expression.Environment -> String -> String
 eval env str =
     case parse str of
-        Err _ ->
-            "Parse error"
+        Err err ->
+            "Parse error: " ++ Debug.toString err
 
         Ok strs ->
             strs
                 |> List.map String.trim
                 |> List.map (lookup env)
-                |> List.map (expand env)
                 |> apply
                 |> Lambda.Expression.beta
                 |> Lambda.Expression.reduceSubscripts
+                -- |> Lambda.Expression.compressNameSpace
                 |> Lambda.Expression.toString
 
 
@@ -61,26 +61,8 @@ lookup env str =
                 Ok expr ->
                     expr
 
-                Err _ ->
-                    Lambda.Expression.Var "ERROR (2)"
-
-
-expand a b =
-    b
-
-
-
---
---expand : MetaTest.Expression.Environment -> LambdaTest.Expression.Expr -> LambdaTest.Expression.Expr
---expand env expr =
---    case expr of
---        LambdaTest.Expression.Var str ->
---            case Dict.get str env of
---                Nothing ->
---                    expr
---
---                Just (Var ) ->
---                    LambdaTest.Expression.Var val
+                Err err ->
+                    Lambda.Expression.Var ("Parse Error (2): " ++ Debug.toString err)
 
 
 itemParser =

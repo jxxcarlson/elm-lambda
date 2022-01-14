@@ -16,3 +16,9 @@ type Problem
 
 type Context
     = TextExpression
+    | Variable
+    | Abstraction
+    | SimpleExpression
+    | Parenthesized
+    | Application
+    | Expression

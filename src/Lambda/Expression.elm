@@ -3,6 +3,8 @@ module Lambda.Expression exposing
     , apply
     , beta
     , boundVariables
+    , compressNameSpace
+    , equivalent
     , freeVariables
     , freshenVariables
     , isNormal
@@ -250,3 +252,23 @@ reduceSubscripts expr =
             List.filter (\s -> not (List.member (String.dropRight 1 s) vars)) varsWithNumericEndings
     in
     List.foldl (\var acc -> renameVariable var (String.dropRight 1 var) acc) expr reducibleVariables
+
+
+compressNameSpace : Expr -> Expr
+compressNameSpace expr =
+    let
+        vars =
+            variables expr |> Set.toList |> List.sort |> List.take 26
+
+        alphabet =
+            String.split "" "abcdefghijklmnopqrstuzwxyz" |> List.take (List.length vars)
+
+        pairs =
+            List.map2 (\a b -> ( a, b )) vars alphabet
+    in
+    List.foldl (\pair acc -> renameVariable (Tuple.first pair) (Tuple.second pair) acc) expr pairs
+
+
+equivalent : Expr -> Expr -> Bool
+equivalent e1 e2 =
+    compressNameSpace (beta e1) == compressNameSpace (beta e2)

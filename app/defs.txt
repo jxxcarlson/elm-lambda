@@ -1,0 +1,23 @@
+definitionString = """
+id        \\x.x
+pair      \\x.\\y.\\f.f x y
+first     \\p.p(\\x.\\y.x)
+second    \\p.p(\\x.\\y.y)
+ab         pair a b
+ab'       \\f.f a b
+
+# Booleans
+true      \\x.\\y.x
+false     \\x.\\y.y
+and       \\p.\\q.p q p
+or        \\p.\\q.p p q
+not       \\p.p (false) true
+
+# Church numerals
+zero      \\s.\\z.z
+one       \\s.\\z.s z
+two       \\s.\\z.s s z
+three     \\s.\\z.s s s z
+isZero    \\n.n (\\x.zero) true
+succ      \\n.\\f.\\x.f(n f x)
+"""

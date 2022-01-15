@@ -10,6 +10,7 @@ module Lambda.Expression exposing
     , isNormal
     , reduceSubscripts
     , renameVariable
+    , rewrite
     , substitute
     , toRawString
     , toString
@@ -18,6 +19,7 @@ module Lambda.Expression exposing
 
 -- https://lambdacalc.io/
 
+import Dict exposing (Dict)
 import Set exposing (Set)
 
 
@@ -25,6 +27,24 @@ type Expr
     = Var String
     | Lambda String Expr
     | Apply Expr Expr
+
+
+rewrite : Dict String String -> Expr -> Expr
+rewrite definitions expr =
+    case expr of
+        Var s ->
+            case Dict.get s definitions of
+                Just t ->
+                    Var t
+
+                Nothing ->
+                    Var s
+
+        Lambda binder body ->
+            Lambda binder (rewrite definitions body)
+
+        Apply e1 e2 ->
+            Apply (rewrite definitions e1) (rewrite definitions e2)
 
 
 toRawString : Expr -> String

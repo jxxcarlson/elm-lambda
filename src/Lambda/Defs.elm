@@ -2,6 +2,8 @@ module Lambda.Defs exposing
     ( Definition
     , addTerm
     , definitionParser
+    , definitions
+    , dictionary
     , expand
     , expand1
     , expandAux
@@ -21,6 +23,32 @@ import Tools.Parser as PT
 
 type alias Definition =
     ( String, String )
+
+
+definitions =
+    """
+id        \\x.x
+pair      \\x.\\y.\\f.f x y
+first     \\p.p(\\x.\\y.x)
+second    \\p.p(\\x.\\y.y)
+ab         pair a b
+ab'       \\f.f a b
+
+# Booleans
+true      \\x.\\y.x
+false     \\x.\\y.y
+and       \\p.\\q.p q p
+or        \\p.\\q.p p q
+not       \\p.p (false) true
+
+# Church numerals
+zero      \\s.\\z.z
+one       \\s.\\z.s z
+two       \\s.\\z.s s z
+three     \\s.\\z.s s s z
+isZero    \\n.n (\\x.\\s.\\z.z) \\x.\\y.x
+succ      \\n.\\f.\\x.f(n f x)
+"""
 
 
 removeComments : String -> String
@@ -104,7 +132,12 @@ addTerm term terms additions =
 
 install : String -> List Definition -> List Definition
 install str defs =
-    List.foldl installOne defs (String.lines str)
+    List.foldl installOne defs (String.lines (removeComments str))
+
+
+dictionary : String -> Dict String String
+dictionary str =
+    Dict.fromList (install str [])
 
 
 installOne : String -> List Definition -> List Definition

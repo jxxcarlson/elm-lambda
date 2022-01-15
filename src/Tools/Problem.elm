@@ -15,13 +15,10 @@ type Problem
 
 
 type Context
-    = TextExpression
-    | Variable
+    = Variable
     | Abstraction
     | SimpleExpression
     | Parenthesized
     | Application
     | Expression
-    | Item
-    | SimpleItem
     | First

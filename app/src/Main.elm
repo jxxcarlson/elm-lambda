@@ -1,6 +1,6 @@
 port module Main exposing (main)
 
-import Cmd.Extra exposing (withCmd, withCmds, withNoCmd)
+import Cmd.Extra exposing (withCmd, withNoCmd)
 import Dict exposing (Dict)
 import Json.Decode as D
 import Json.Encode as E
@@ -128,16 +128,6 @@ prettify str =
     String.replace "\\" (String.fromChar 'λ') str
 
 
-prettifyPair : ( String, String ) -> String
-prettifyPair ( a, b ) =
-    "(" ++ a ++ ", " ++ prettify b ++ ")"
-
-
-prettifyPairList : List ( String, String ) -> String
-prettifyPairList pairs =
-    List.foldl (\p acc -> acc ++ prettifyPair p ++ "\n") "" pairs
-
-
 processCommand : Model -> String -> ( Model, Cmd Msg )
 processCommand model cmdString =
     let
@@ -213,10 +203,6 @@ processCommand model cmdString =
             model |> withCmd (put (Lambda.Eval.eval model.environment cmdString))
 
 
-betaReduce model str =
-    model |> withCmd (put <| transformOutput model.viewStyle <| transform (applySubstitutions model.substitutions str))
-
-
 isNormal model str =
     let
         output =
@@ -231,11 +217,6 @@ isNormal model str =
                     "Error (normal)"
     in
     model |> withCmd (put <| output)
-
-
-applySubstitutions : List ( String, String ) -> String -> String
-applySubstitutions substitutions str =
-    List.foldl (\( a, b ) s -> String.replace a b s) str substitutions
 
 
 
@@ -291,16 +272,6 @@ getResidualCmd input =
 -- FILE/CONTENT OPERATIONS
 
 
-transform : String -> String
-transform str =
-    case str |> parse |> Result.map (Lambda.beta >> Lambda.toString) of
-        Ok output ->
-            output
-
-        Err _ ->
-            "Error (parse)"
-
-
 removeComments : String -> String
 removeComments input =
     input
@@ -308,13 +279,3 @@ removeComments input =
         |> List.filter (\line -> String.left 1 line /= "#")
         |> String.join "\n"
         |> String.trim
-
-
-listToPair : List a -> Maybe ( a, a )
-listToPair list =
-    case list of
-        x :: y :: [] ->
-            Just ( x, y )
-
-        _ ->
-            Nothing

@@ -1,6 +1,5 @@
 module LambdaTest exposing (suite)
 
-import Dict
 import Expect
 import Lambda.Expression exposing (Expr(..), beta)
 import Test exposing (..)

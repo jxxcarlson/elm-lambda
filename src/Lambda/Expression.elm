@@ -27,15 +27,6 @@ type Expr
     | Apply Expr Expr
 
 
-parenthesize : String -> String
-parenthesize str =
-    if String.left 1 str == "(" && String.right 1 str == ")" then
-        str
-
-    else
-        "(" ++ str ++ ")"
-
-
 toRawString : Expr -> String
 toRawString expr =
     case expr of
@@ -232,11 +223,6 @@ betaAux expr =
 isNormal : Expr -> Bool
 isNormal expr =
     beta expr == expr
-
-
-numericEnding : String -> Maybe Int
-numericEnding str =
-    String.right 1 str |> String.toInt
 
 
 numerals =

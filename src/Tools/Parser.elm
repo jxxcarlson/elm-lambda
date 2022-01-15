@@ -15,7 +15,6 @@ module Tools.Parser exposing
     )
 
 import Parser exposing ((|.), (|=), Parser)
-import Tools.Problem exposing (Context(..), Problem(..))
 
 
 word : Parser String

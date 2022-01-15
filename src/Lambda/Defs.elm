@@ -13,6 +13,7 @@ module Lambda.Defs exposing
     , parse
     , removeComments
     , resolve
+    , show
     )
 
 import Dict exposing (Dict)
@@ -31,8 +32,6 @@ id        \\x.x
 pair      \\x.\\y.\\f.f x y
 first     \\p.p(\\x.\\y.x)
 second    \\p.p(\\x.\\y.y)
-ab         pair a b
-ab'       \\f.f a b
 
 # Booleans
 true      \\x.\\y.x
@@ -49,6 +48,11 @@ three     \\s.\\z.s s s z
 isZero    \\n.n (\\x.\\s.\\z.z) \\x.\\y.x
 succ      \\n.\\f.\\x.f(n f x)
 """
+
+
+show : Dict String String -> String
+show dict =
+    dict |> Dict.toList |> List.foldl (\( a, b ) acc -> acc ++ "\n" ++ a ++ ": " ++ b) ""
 
 
 removeComments : String -> String
@@ -132,7 +136,7 @@ addTerm term terms additions =
 
 install : String -> List Definition -> List Definition
 install str defs =
-    List.foldl installOne defs (String.lines (removeComments str))
+    List.foldl installOne defs (String.lines (removeComments str)) |> expand
 
 
 dictionary : String -> Dict String String

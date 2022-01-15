@@ -2,35 +2,14 @@ module LambdaTest exposing (suite)
 
 import Dict
 import Expect
-import Lambda.Eval exposing (Value(..), eval)
 import Lambda.Expression exposing (Expr(..), beta)
-import Library exposing (id_)
 import Test exposing (..)
 
 
 suite : Test
 suite =
     describe "Lambda"
-        [ describe "eval"
-            [ test "eval variable, empty environment" <|
-                \_ ->
-                    eval (Var "x") Dict.empty
-                        |> Expect.equal (Lambda.Eval.Err "Variable not defined")
-            , test "eval variable, x = 17 in environment" <|
-                \_ ->
-                    eval (Var "x") (Dict.singleton "x" (Int 17))
-                        |> Expect.equal (Int 17)
-            , test "eval application (identity function)" <|
-                \_ ->
-                    eval (Apply (Lambda "x" (Var "x")) (Var "x"))
-                        (Dict.singleton "x" (Int 17))
-                        |> Expect.equal (Int 17)
-            , test "eval application (identity function (2))" <|
-                \_ ->
-                    eval (Apply (Lambda "x" (Var "x")) (Var "y")) (Dict.singleton "y" (Str "y"))
-                        |> Expect.equal (Str "y")
-            ]
-        , describe "beta"
+        [ describe "beta"
             [ test
                 "true e f -> e"
               <|
@@ -43,38 +22,6 @@ suite =
                 \_ ->
                     beta (Apply (Apply (Lambda "x" (Lambda "y" (Var "y"))) (Var "e")) (Var "f"))
                         |> Expect.equal (Var "f")
-            , test "id id -> id" <|
-                \_ -> beta (Apply (id_ "x") (id_ "y")) |> Expect.equal (id_ "y")
-            , test
-                "zero (Var 'u')"
-              <|
-                \_ ->
-                    beta (Apply (Library.zero "s" "z") (Var "u"))
-                        |> Expect.equal (Lambda "z" (Var "z"))
-            , test
-                "one zero"
-              <|
-                \_ ->
-                    beta (Apply (Library.one "s" "z") (Library.zero "s'" "z'"))
-                        |> Expect.equal (Lambda "z" (Lambda "z'" (Var "z'")))
-            , test
-                "zero one"
-              <|
-                \_ ->
-                    beta (Apply (Library.zero "s" "z") (Library.one "s'" "z'"))
-                        |> Expect.equal (Lambda "z" (Var "z"))
-            , test
-                "isZero zero"
-              <|
-                \_ ->
-                    beta (Apply Library.isZero (Library.zero "u" "v"))
-                        |> Expect.equal Library.true
-            , test
-                "isZero one"
-              <|
-                \_ ->
-                    beta (Apply Library.isZero (Library.one "u" "v"))
-                        |> Expect.equal Library.false
             ]
         ]
 

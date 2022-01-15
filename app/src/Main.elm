@@ -1,15 +1,14 @@
 port module Main exposing (main)
 
 import Cmd.Extra exposing (withCmd, withCmds, withNoCmd)
-import Dict
+import Dict exposing (Dict)
 import Json.Decode as D
 import Json.Encode as E
-import Lambda.Defs as Defs
+import Lambda.Defs
+import Lambda.Eval
 import Lambda.Expression as Lambda
 import Lambda.Parser exposing (parse)
 import List.Extra
-import Meta.Expression
-import Meta.Lang
 import Platform exposing (Program)
 import Text
 
@@ -38,9 +37,7 @@ main =
 type alias Model =
     { residualCommand : String
     , fileContents : Maybe String
-
-    -- , definitions : List ( String, String )
-    , environment : Meta.Expression.Environment
+    , environment : Dict String String
     , viewStyle : ViewStyle
     }
 
@@ -64,8 +61,6 @@ init _ =
     { residualCommand = ""
     , fileContents = Nothing
     , environment = Dict.empty
-
-    -- , definitions = []
     , viewStyle = Pretty
     }
         |> withCmd (loadFileCmd "default_defs.txt")
@@ -106,7 +101,7 @@ update msg model =
                                     ":" ++ model.residualCommand ++ " " ++ removeComments data_
 
                         environment =
-                            Meta.Expression.setupEnviroment data
+                            Lambda.Defs.dictionary data
                     in
                     -- { model | fileContents = Just data } |> withCmd (put <| "Data read: " ++ String.fromInt (String.length input))
                     { model
@@ -187,7 +182,7 @@ processCommand model cmdString =
                             data =
                                 String.join " " rest |> String.trimRight
                         in
-                        { model | environment = Meta.Expression.addVar name data model.environment } |> withCmd (put <| "added " ++ name ++ " as " ++ transformOutput model.viewStyle data)
+                        { model | environment = Dict.insert name data model.environment } |> withCmd (put <| "added " ++ name ++ " as " ++ transformOutput model.viewStyle data)
 
                 _ ->
                     model |> withCmd (put "Bad args")
@@ -211,11 +206,11 @@ processCommand model cmdString =
             model |> withCmd (put (model.fileContents |> Maybe.withDefault "no environment defined" |> transformOutput model.viewStyle))
 
         Just ":env" ->
-            model |> withCmd (put (Meta.Expression.showEnvironment model.environment))
+            model |> withCmd (put (Lambda.Defs.show model.environment))
 
         _ ->
             -- return default output
-            model |> withCmd (put (Meta.Lang.eval model.environment cmdString))
+            model |> withCmd (put (Lambda.Eval.eval model.environment cmdString))
 
 
 betaReduce model str =

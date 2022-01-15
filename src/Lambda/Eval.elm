@@ -1,46 +1,43 @@
-module Lambda.Eval exposing (Env, Value(..), env1, eval)
+module Lambda.Eval exposing (eval)
 
 import Dict exposing (Dict)
 import Lambda.Expression exposing (Expr(..))
+import Lambda.Parser
 
 
-type Value
-    = Int Int
-    | Str String
-    | Err String
-    | Closure String Expr Env
+eval : Dict String String -> String -> String
+eval dict str =
+    case Lambda.Parser.parse str of
+        Err err ->
+            "Parse error: " ++ Debug.toString err
+
+        Ok expr ->
+            rewrite dict expr
+                |> Lambda.Expression.beta
+                |> Lambda.Expression.reduceSubscripts
+                -- |> Lambda.Expression.compressNameSpace
+                |> Lambda.Expression.toString
 
 
-type alias Env =
-    Dict String Value
-
-
-env1 =
-    Dict.fromList
-        [ ( "z", Int 0 )
-        , ( "1", Int 1 )
-        , ( "2", Int 2 )
-        ]
-
-
-eval : Expr -> Env -> Value
-eval expr env =
+rewrite : Dict String String -> Expr -> Expr
+rewrite definitions expr =
     case expr of
-        Var name ->
-            Dict.get name env |> Maybe.withDefault (Err "Variable not defined")
+        Var s ->
+            case Dict.get s definitions of
+                Just t ->
+                    -- Var (parenthesize t)
+                    case Lambda.Parser.parse t of
+                        Ok u ->
+                            u
 
-        Lambda name body ->
-            Closure name body env
+                        Err _ ->
+                            Var "ERROR"
 
-        Apply operator operand ->
-            call (eval operator env) (eval operand env)
+                Nothing ->
+                    Var s
 
+        Lambda binder body ->
+            Lambda binder (rewrite definitions body)
 
-call : Value -> Value -> Value
-call f x =
-    case f of
-        Closure name expr env ->
-            eval expr (Dict.insert name x env)
-
-        _ ->
-            Err "I can only call functions"
+        Apply e1 e2 ->
+            Apply (rewrite definitions e1) (rewrite definitions e2)

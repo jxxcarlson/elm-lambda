@@ -1,15 +1,15 @@
-module Lambda.Parser exposing
-    ( Parser
-    , abstractionParser
-    , applicationParser
-    , exprParser
-    , parse
-    , rawVariableParser
-    , simpleExprParser
-    , text
-    , unsafeParse
-    , variableParser
-    )
+module Lambda.Parser exposing (parse, exprParser)
+
+{-| The primary function exported is
+
+    parse : String -> Result Error Expr
+
+If application of parse to a string is successful it
+returns an Expr.
+
+@docs parse, exprParser
+
+-}
 
 import Lambda.Expression exposing (Expr(..))
 import Parser.Advanced as PA exposing ((|.), (|=))
@@ -22,19 +22,10 @@ type alias Parser a =
     PA.Parser Context Problem a
 
 
+{-| -}
 parse : String -> Result (List (PA.DeadEnd Context Problem)) Expr
 parse str =
     PA.run exprParser str
-
-
-unsafeParse : String -> Expr
-unsafeParse str =
-    case parse str of
-        Ok expr ->
-            expr
-
-        Err _ ->
-            Var "PARSE ERROR"
 
 
 {-|

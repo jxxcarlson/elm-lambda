@@ -1,20 +1,11 @@
-module Lambda.Defs exposing
-    ( Definition
-    , addTerm
-    , definitionParser
-    , definitions
-    , dictionary
-    , expand
-    , expand1
-    , expandAux
-    , install
-    , installOne
-    , lambda
-    , parse
-    , removeComments
-    , resolve
-    , show
-    )
+module Lambda.Defs exposing (dictionary, show)
+
+{-| This module provides the means (via function dictionary) of constructing
+a dictionary of terms to be used by the rewriting functions.
+
+@docs dictionary, show
+
+-}
 
 import Dict exposing (Dict)
 import Maybe.Extra
@@ -50,6 +41,8 @@ succ      \\n.\\f.\\x.f(n f x)
 """
 
 
+{-| Construct a string representation of the given dictionary.
+-}
 show : Dict String String -> String
 show dict =
     dict |> Dict.toList |> List.foldl (\( a, b ) acc -> acc ++ "\n" ++ a ++ ": " ++ b) ""
@@ -139,6 +132,8 @@ install str defs =
     List.foldl installOne defs (String.lines (removeComments str)) |> expand
 
 
+{-| Construct a dictionary of pairs for rewrite rules from an input string.
+-}
 dictionary : String -> Dict String String
 dictionary str =
     Dict.fromList (install str [])

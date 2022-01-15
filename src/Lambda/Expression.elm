@@ -1,26 +1,18 @@
-module Lambda.Expression exposing
-    ( Expr(..)
-    , apply
-    , beta
-    , boundVariables
-    , compressNameSpace
-    , equivalent
-    , freeVariables
-    , freshenVariables
-    , isNormal
-    , reduceSubscripts
-    , renameVariable
-    , substitute
-    , toRawString
-    , toString
-    , variables
-    )
+module Lambda.Expression exposing (Expr(..), beta, compressNameSpace, isNormal, reduceSubscripts, toString)
 
--- https://lambdacalc.io/
+{-| In this module we define the type Expr used to represent the lambda calculus.
+The main function is beta: Expr -> Expr which carries out beta reductions.
+
+@docs Expr, beta, compressNameSpace, isNormal, reduceSubscripts, toString
+
+For checking things: <https://lambdacalc.io/>
+
+-}
 
 import Set exposing (Set)
 
 
+{-| -}
 type Expr
     = Var String
     | Lambda String Expr
@@ -40,6 +32,8 @@ toRawString expr =
             toRawString e1 ++ " " ++ toRawString e2
 
 
+{-| String representation of expression
+-}
 toString : Expr -> String
 toString expr =
     case expr of
@@ -191,6 +185,8 @@ substitute expr1 x expr2 =
             Apply (substitute expr1 x e1) (substitute expr1 x e2)
 
 
+{-| beta reduce expression
+-}
 beta : Expr -> Expr
 beta expr =
     if betaAux expr == expr then
@@ -220,6 +216,8 @@ betaAux expr =
             expr
 
 
+{-| is the expression in normal form?
+-}
 isNormal : Expr -> Bool
 isNormal expr =
     beta expr == expr
@@ -234,6 +232,8 @@ hasNumericEnding str =
     List.member (String.right 1 str) numerals
 
 
+{-| remove numeric subscripts in variable names to the extent possible
+-}
 reduceSubscripts : Expr -> Expr
 reduceSubscripts expr =
     let
@@ -249,6 +249,8 @@ reduceSubscripts expr =
     List.foldl (\var acc -> renameVariable var (String.dropRight 1 var) acc) expr reducibleVariables
 
 
+{-| Map variable names to "a", "b", ..., "z" to the extent possible
+-}
 compressNameSpace : Expr -> Expr
 compressNameSpace expr =
     let

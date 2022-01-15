@@ -26,6 +26,12 @@ test1     (isZero) one
 test2     (isZero) two
 test3     (isZero) three
 
+# Tests with succ
+s1        succ zero
+s2        succ (succ zero)
+t1        (λn.λf.λx.f (n f x)) (λs.λz.z) # succ zero
+t2        (λn.λf.λx.f (n f x)) ((λn.λf.λx.f (n f x)) (λs.λz.z)) # succ succ zero
+
 
 # > first (pair a b)
 # Parse error
@@ -36,6 +42,7 @@ test3     (isZero) three
 # (three)two       parse error
 
 # > (\n.\f.\x.f(n f x))
+# λn.λf.λx.f(n f x)
 #  ERROR (2)(f)(x) (parse error)
 
 # pair a b -> λf.f a b

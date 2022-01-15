@@ -84,7 +84,9 @@ and return the result of running p.
 -}
 first : Parser a -> Parser b -> Parser a
 first p q =
-    p |> PA.andThen (\x -> q |> PA.map (\_ -> x))
+    PA.inContext First
+        p
+        |> PA.andThen (\x -> q |> PA.map (\_ -> x))
 
 
 {-| running `second p q` means run p, then run q

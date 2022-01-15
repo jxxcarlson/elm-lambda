@@ -22,3 +22,6 @@ type Context
     | Parenthesized
     | Application
     | Expression
+    | Item
+    | SimpleItem
+    | First

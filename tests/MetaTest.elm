@@ -38,6 +38,7 @@ one       \\s.\\z.s z
 two       \\s.\\z.s s z
 three     \\s.\\z.s s s z
 isZero    \\n.n (\\x.zero) true
+succ      \\n.\\f.\\x.f(n f x)
 
 # Tests
 test0     (isZero) zero
@@ -57,4 +58,10 @@ suite =
         , testEval "and true false" "λx.λy.y"
         , testEval "and false true" "λx.λy.y"
         , testEval "and false false" "λx.λy.y"
+        , testEval "succ zero" "λf.λx.f(x)"
+        , testEval "isZero zero" "λx.λy.x"
+        , testEval "isZero one" "λs.λz.z"
+        , testEval "a b c" "a(b)(c)"
+        , testEval "(a b c)" "a(b)(c)"
+        , testEval "λx.(a b)" "λx.a(b)"
         ]

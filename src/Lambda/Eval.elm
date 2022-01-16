@@ -44,7 +44,7 @@ equivalent dict str =
         Ok expr ->
             case rewrite dict expr of
                 Apply a b ->
-                    case Lambda.Expression.beta a == Lambda.Expression.beta b of
+                    case Lambda.Expression.beta (Lambda.Expression.compressNameSpace a) == Lambda.Expression.beta (Lambda.Expression.compressNameSpace b) of
                         True ->
                             "true"
 

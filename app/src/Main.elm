@@ -38,13 +38,8 @@ type alias Model =
     { residualCommand : String
     , fileContents : Maybe String
     , environment : Dict String String
-    , viewStyle : ViewStyle
+    , viewStyle : Lambda.ViewStyle
     }
-
-
-type ViewStyle
-    = Raw
-    | Pretty
 
 
 type Msg
@@ -61,7 +56,7 @@ init _ =
     { residualCommand = ""
     , fileContents = Nothing
     , environment = Dict.empty
-    , viewStyle = Pretty
+    , viewStyle = Lambda.Named
     }
         |> withCmd (loadFileCmd "default_defs.txt")
 
@@ -113,13 +108,16 @@ update msg model =
                         |> withCmd (put <| transformOutput model.viewStyle <| data)
 
 
-transformOutput : ViewStyle -> String -> String
+transformOutput : Lambda.ViewStyle -> String -> String
 transformOutput viewStyle str =
     case viewStyle of
-        Raw ->
+        Lambda.Raw ->
             str
 
-        Pretty ->
+        Lambda.Pretty ->
+            prettify str
+
+        Lambda.Named ->
             prettify str
 
 
@@ -178,10 +176,13 @@ processCommand model cmdString =
                     model |> withCmd (put "Bad args")
 
         Just ":raw" ->
-            { model | viewStyle = Raw } |> withCmd (put "view style = raw")
+            { model | viewStyle = Lambda.Raw } |> withCmd (put "view style = raw")
 
         Just ":pretty" ->
-            { model | viewStyle = Pretty } |> withCmd (put "view style = pretty")
+            { model | viewStyle = Lambda.Pretty } |> withCmd (put "view style = pretty")
+
+        Just ":named" ->
+            { model | viewStyle = Lambda.Named } |> withCmd (put "view style = named")
 
         Just ":load" ->
             loadFile model arg
@@ -200,7 +201,7 @@ processCommand model cmdString =
 
         _ ->
             -- return default output
-            model |> withCmd (put (Lambda.Eval.eval model.environment cmdString))
+            model |> withCmd (put (Lambda.Eval.eval model.viewStyle model.environment cmdString))
 
 
 isNormal model str =

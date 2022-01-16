@@ -1,4 +1,7 @@
-module Lambda.Expression exposing (Expr(..), beta, compressNameSpace, isNormal, reduceSubscripts, toString)
+module Lambda.Expression exposing
+    ( Expr(..), beta, compressNameSpace, isNormal, reduceSubscripts, toString
+    , ViewStyle(..)
+    )
 
 {-| In this module we define the type Expr used to represent the lambda calculus.
 The main function is beta: Expr -> Expr which carries out beta reductions.
@@ -19,6 +22,25 @@ type Expr
     | Apply Expr Expr
 
 
+type ViewStyle
+    = Raw
+    | Pretty
+    | Named
+
+
+toString : ViewStyle -> Expr -> String
+toString viewStyle expr =
+    case viewStyle of
+        Raw ->
+            toRawString expr
+
+        Pretty ->
+            toPrettyString expr
+
+        Named ->
+            toPrettyString expr
+
+
 toRawString : Expr -> String
 toRawString expr =
     case expr of
@@ -34,18 +56,17 @@ toRawString expr =
 
 {-| String representation of expression
 -}
-toString : Expr -> String
-toString expr =
+toPrettyString : Expr -> String
+toPrettyString expr =
     case expr of
         Var str ->
             str
 
         Lambda binder expr_ ->
-            String.fromChar 'λ' ++ binder ++ "." ++ toString expr_
+            String.fromChar 'λ' ++ binder ++ "." ++ toPrettyString expr_
 
         Apply e1 e2 ->
-            -- toString e1 ++ " " ++ toString e2
-            toString e1 ++ "(" ++ toString e2 ++ ")"
+            toPrettyString e1 ++ "(" ++ toPrettyString e2 ++ ")"
 
 
 apply : List Expr -> Expr

@@ -25,8 +25,10 @@ STR              # beta reduce STR
 :reset           # reset environment
 :show            # display environment file
 :env             # display current environment
+
 :raw             # set app for raw output, e.g., \\x.x
 :pretty          # set app for pretty output, e.g., λx.x
+:named           # set app for named output, e.g., 'true' instead of λx.λy.x
 
 To quit, type ^D.
 

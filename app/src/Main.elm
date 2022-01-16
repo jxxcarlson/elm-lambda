@@ -58,7 +58,7 @@ init _ =
     , environment = Dict.empty
     , viewStyle = Lambda.Named
     }
-        |> withCmd (loadFileCmd "default_defs.txt")
+        |> withCmd (loadFileCmd "defs.txt")
 
 
 subscriptions : Model -> Sub Msg
@@ -175,14 +175,17 @@ processCommand model cmdString =
                 _ ->
                     model |> withCmd (put "Bad args")
 
+        Just ":beta" ->
+            model |> withCmd (put (Lambda.Eval.equivalent model.environment (String.replace ":beta " "" cmdString)))
+
         Just ":raw" ->
-            { model | viewStyle = Lambda.Raw } |> withCmd (put "view style = raw")
+            { model | viewStyle = Lambda.Raw } |> withCmd (put "")
 
         Just ":pretty" ->
-            { model | viewStyle = Lambda.Pretty } |> withCmd (put "view style = pretty")
+            { model | viewStyle = Lambda.Pretty } |> withCmd (put "")
 
         Just ":named" ->
-            { model | viewStyle = Lambda.Named } |> withCmd (put "view style = named")
+            { model | viewStyle = Lambda.Named } |> withCmd (put "")
 
         Just ":load" ->
             loadFile model arg
@@ -200,7 +203,7 @@ processCommand model cmdString =
             model |> withCmd (put (Lambda.Defs.show model.environment))
 
         _ ->
-            -- return default output
+            -- return default output (beta reduce input)
             model |> withCmd (put (Lambda.Eval.eval model.viewStyle model.environment cmdString))
 
 

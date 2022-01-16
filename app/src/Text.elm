@@ -18,9 +18,10 @@ STR              # beta reduce STR
 :let a b         # store b in the variable a
 :parse STR       # parse STR to Expr
 :normal STR      # is STR in normal form?
+:beta a b        # is a beta-equivalent to b?
 
 :examples        # display examples
-:load default_defs.txt   # load definitions file
+:load defs.txt   # load definitions file
 
 :reset           # reset environment
 :show            # display environment file

@@ -1,4 +1,7 @@
-module Lambda.Eval exposing (eval)
+module Lambda.Eval exposing
+    ( eval
+    , equivalent
+    )
 
 {-| There is a single exposed function,
 
@@ -30,6 +33,26 @@ back into a string.
 import Dict exposing (Dict)
 import Lambda.Expression exposing (Expr(..), ViewStyle(..))
 import Lambda.Parser
+
+
+equivalent : Dict String String -> String -> String
+equivalent dict str =
+    case Lambda.Parser.parse str of
+        Err err ->
+            "Parse error: " ++ Debug.toString err
+
+        Ok expr ->
+            case rewrite dict expr of
+                Apply a b ->
+                    case Lambda.Expression.beta a == Lambda.Expression.beta b of
+                        True ->
+                            "true"
+
+                        False ->
+                            "false"
+
+                _ ->
+                    "Bad args"
 
 
 {-| -}

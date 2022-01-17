@@ -44,12 +44,27 @@ equivalent dict str =
         Ok expr ->
             case rewrite dict expr of
                 Apply a b ->
-                    case Lambda.Expression.beta (Lambda.Expression.compressNameSpace a) == Lambda.Expression.beta (Lambda.Expression.compressNameSpace b) of
-                        True ->
-                            "true"
+                    case ( Lambda.Expression.beta a, Lambda.Expression.beta b ) of
+                        ( Var s, Var t ) ->
+                            if String.left 22 s == "TOO MANY SUBSTITUTIONS" then
+                                "LHS may be divergent"
 
-                        False ->
-                            "false"
+                            else if String.left 22 t == "TOO MANY SUBSTITUTIONS" then
+                                "RHS may be divergent"
+
+                            else if s == t then
+                                "true"
+
+                            else
+                                "false"
+
+                        _ ->
+                            case Lambda.Expression.equivalent a b of
+                                True ->
+                                    "true"
+
+                                False ->
+                                    "false"
 
                 _ ->
                     "Bad args"
@@ -63,7 +78,8 @@ eval viewStyle dict str =
             "Parse error: " ++ Debug.toString err
 
         Ok expr ->
-            rewrite dict expr
+            expr
+                |> rewrite dict
                 |> Lambda.Expression.beta
                 |> Lambda.Expression.reduceSubscripts
                 -- |> Lambda.Expression.compressNameSpace

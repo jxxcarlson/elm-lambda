@@ -46,15 +46,15 @@ suite =
 {-
 
 
-   > e1 = LambdaTest "a" (Var "a")
-   LambdaTest "a" (Var "a") : Expr
+   > e1 = Lambda "a" (Var "a")
+   Lambda "a" (Var "a") : Expr
 
-   > e2 = LambdaTest "b" (Var "x")
-   LambdaTest "b" (Var "x") : Expr
+   > e2 = Lambda "b" (Var "x")
+   Lambda "b" (Var "x") : Expr
 
    > substitute e1 "x" e2
-   LambdaTest "b" (LambdaTest "a" (Var "a"))
+   Lambda "b" (Lambda "a" (Var "a"))
 
    > substitute e1 "x" (App e2 e2)
-   App (LambdaTest "b" (LambdaTest "a" (Var "a"))) (LambdaTest "b" (LambdaTest "a" (Var "a")))
+   App (Lambda "b" (Lambda "a" (Var "a"))) (Lambda "b" (Lambda "a" (Var "a")))
 -}

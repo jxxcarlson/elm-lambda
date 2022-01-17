@@ -1,4 +1,7 @@
-module Lambda.Parser exposing (parse, exprParser)
+module Lambda.Parser exposing
+    ( parse, exprParser
+    , parseUnsafe
+    )
 
 {-| The primary function exported is
 
@@ -26,6 +29,16 @@ type alias Parser a =
 parse : String -> Result (List (PA.DeadEnd Context Problem)) Expr
 parse str =
     PA.run exprParser str
+
+
+parseUnsafe : String -> Expr
+parseUnsafe str =
+    case parse str of
+        Ok e ->
+            e
+
+        Err _ ->
+            Var "Parse failed"
 
 
 {-|

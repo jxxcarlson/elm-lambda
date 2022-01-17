@@ -1,6 +1,6 @@
 module Lambda.Expression exposing
     ( Expr(..), beta, compressNameSpace, isNormal, reduceSubscripts, toString
-    , ViewStyle(..)
+    , ViewStyle(..), alphaConvertWithExpr, applyVariableMap, compare, depth, equivalent, size, size2, substitute, variableMap
     )
 
 {-| In this module we define the type Expr used to represent the lambda calculus.
@@ -12,6 +12,8 @@ For checking things: <https://lambdacalc.io/>
 
 -}
 
+import Dict exposing (Dict)
+import List.Extra
 import Set exposing (Set)
 
 
@@ -20,6 +22,116 @@ type Expr
     = Var String
     | Lambda String Expr
     | Apply Expr Expr
+
+
+{-| Run alpha conversions on e2 using the map e2 -> e1.
+If e1 and e2 do not have the same structure, then e2 is
+returned unchanged
+-}
+alphaConvertWithExpr : Expr -> Expr -> Expr
+alphaConvertWithExpr e1 e2 =
+    let
+        vMap =
+            variableMap e2 e1 |> Maybe.withDefault Dict.empty
+    in
+    applyVariableMap vMap e2
+
+
+applyVariableMap : Dict String String -> Expr -> Expr
+applyVariableMap vMap expr =
+    case expr of
+        Var x ->
+            case Dict.get x vMap of
+                Nothing ->
+                    Var x
+
+                Just y ->
+                    Var y
+
+        Lambda x e ->
+            case Dict.get x vMap of
+                Nothing ->
+                    Lambda x (applyVariableMap vMap e)
+
+                Just y ->
+                    Lambda y (applyVariableMap vMap e)
+
+        Apply e1 e2 ->
+            Apply (applyVariableMap vMap e1) (applyVariableMap vMap e2)
+
+
+variableMap : Expr -> Expr -> Maybe (Dict String String)
+variableMap a b =
+    let
+        map_ =
+            compare a b |> List.sort |> List.Extra.unique
+
+        va =
+            variables a
+
+        vb =
+            variables b
+    in
+    if Set.size va == Set.size vb && Set.size va == List.length map_ then
+        Just (Dict.fromList map_)
+
+    else
+        Nothing
+
+
+compare : Expr -> Expr -> List ( String, String )
+compare e1 e2 =
+    case ( e1, e2 ) of
+        ( Var x, Var y ) ->
+            [ ( x, y ) ]
+
+        ( Lambda x1 b1, Lambda x2 b2 ) ->
+            ( x1, x2 ) :: compare b1 b2
+
+        ( Apply a1 b1, Apply a2 b2 ) ->
+            compare a1 a2 ++ compare b1 b2
+
+        _ ->
+            [ ( "Error", "Error" ) ]
+
+
+size : Expr -> Int
+size expr =
+    case expr of
+        Var _ ->
+            1
+
+        Lambda _ e ->
+            1 + size e
+
+        Apply e1 e2 ->
+            1 + size e1 + size e2
+
+
+size2 : Expr -> Int
+size2 expr =
+    case expr of
+        Var str ->
+            String.length str
+
+        Lambda _ e ->
+            1 + size2 e
+
+        Apply e1 e2 ->
+            1 + size2 e1 + size2 e2
+
+
+depth : Expr -> Int
+depth expr =
+    case expr of
+        Var _ ->
+            1
+
+        Lambda _ e ->
+            1 + size e
+
+        Apply e1 e2 ->
+            1 + max (size e1) (size e2)
 
 
 type ViewStyle
@@ -185,6 +297,11 @@ freshAux count str avoid =
         newStr
 
 
+{-|
+
+    substitute expr1 for (Var "x") in expr2
+
+-}
 substitute : Expr -> String -> Expr -> Expr
 substitute expr1 x expr2 =
     case expr2 of
@@ -206,6 +323,10 @@ substitute expr1 x expr2 =
             Apply (substitute expr1 x e1) (substitute expr1 x e2)
 
 
+maxSize2 =
+    100000
+
+
 {-| beta reduce expression
 -}
 beta : Expr -> Expr
@@ -224,8 +345,15 @@ betaAux expr =
             let
                 e2Fresh =
                     freshenVariables e2 e1
+
+                a =
+                    substitute e2Fresh x e1
             in
-            substitute e2Fresh x e1
+            if size2 a > maxSize2 then
+                Var ("TOO MANY SUBSTITUTIONS (size2 > " ++ String.fromInt maxSize2 ++ "). Term may be divergent")
+
+            else
+                a
 
         Lambda x e ->
             Lambda x (beta e)
@@ -279,8 +407,9 @@ compressNameSpace expr =
             variables expr |> Set.toList |> List.sort |> List.take 26
 
         alphabet =
-            String.split "" "abcdefghijklmnopqrstuzwxyz" |> List.take (List.length vars)
+            String.split "" "abcdefghijklmnopqrstuvwxyz" |> List.take (List.length vars)
 
+        -- List.range 0 25 |> List.map (\n -> "X" ++ String.fromInt n)
         pairs =
             List.map2 (\a b -> ( a, b )) vars alphabet
     in
@@ -289,4 +418,11 @@ compressNameSpace expr =
 
 equivalent : Expr -> Expr -> Bool
 equivalent e1 e2 =
-    compressNameSpace (beta e1) == compressNameSpace (beta e2)
+    let
+        f1 =
+            beta e1
+
+        f2 =
+            alphaConvertWithExpr f1 (beta e2)
+    in
+    f1 == f2

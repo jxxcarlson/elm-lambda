@@ -1,9 +1,9 @@
+omega     \x.x x
+Omega     (\x.x x) (\x.x x)
 id        \x.x
 pair      \x.\y.\f.f x y
 first     \p.p(\x.\y.x)
 second    \p.p(\x.\y.y)
-ab         pair a b
-ab'       \f.f a b
 
 # Booleans
 true      \x.\y.x

@@ -56,7 +56,7 @@ init _ =
     { residualCommand = ""
     , fileContents = Nothing
     , environment = Dict.empty
-    , viewStyle = Lambda.Named
+    , viewStyle = Lambda.Pretty
     }
         |> withCmd (loadFileCmd "defs.txt")
 

@@ -70,11 +70,14 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Input input ->
-            case input == "" of
-                True ->
-                    model |> withNoCmd
+            case input of
+                "" ->
+                    model |> withCmd (put "")
 
-                False ->
+                "\n" ->
+                    model |> withCmd (put "")
+
+                _ ->
                     -- process user input
                     processCommand { model | residualCommand = getResidualCmd input } input
 
